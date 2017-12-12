@@ -1,0 +1,88 @@
+﻿<main role="main">
+
+    <div class="jumbotron">
+        <div class="container">
+            <h1 class="display-3">Speaker verification </h1>
+            <p>we couldn't find your voice in our records, please enroll your vioce </p>
+        </div>
+    </div>
+
+    <div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12" >
+            <ul>
+                <li>
+                    Select a pass phrase from the given list of phrases.
+                </li>
+                <li>
+                     Record this phrase 3 times. Click microphone to start and stop recording.
+                </li>
+                <li>
+                    Remember your pin and you can log in with your voice from now on!
+                </li>
+            </ul>
+           
+            <div align="center">
+                <select class="" id="verificationphrases_selector">
+                    <option value="" selected disabled hidden>Choose here</option>
+                </select>
+
+            </div>
+        </div>
+        <div class="row" align="center">
+            <div class="col-sm-12">
+                <div id="viz">
+                    <canvas id="analyser" height="50"></canvas>
+                    <canvas id="wavedisplay" height="50"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="row  " align="center">
+            <div class="col-sm-12">
+                <p id="verificationphrase"> </p>
+                <p id="enrollmessage"></p>
+            </div>
+        </div>
+        <div class="row " align="center">
+            <div class="col-sm-12">
+                <p>enrollments count : <span class="badge" id="enrollmentsCount"> 0</span></p>
+                <p>remaining enrollments: <span class="badge" id="remainingEnrollments">3</span></p>
+            </div>
+            <div class="col-sm-12">
+                <div class="verification-circles ">
+                    <div class="verification-circle">1</div>
+                    <div class="verification-circle">2</div>
+                    <div class="verification-circle">3</div>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="pin-info hidden">
+                    <p>your pin is <span id="pin"></span></p>
+                </div>
+            </div>
+
+        </div>
+        <div class="row" align="center">
+            <div class="col-sm-12">
+                <div id="controls">
+                    <img id="record" src="/images/mic128.png" onclick="toggleRecording(this);">
+                    <a id="save" href="#">
+                        <img src="/images/save.svg">
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+@section scripts{
+    <script src="~/js/audiodisplay.js"></script>
+    <script src="~/js/recorderjs/recorder.js"></script>
+    <script src="~/js/speaker-verification.js"></script>
+    <script src="~/js/main.js"></script>
+}
+

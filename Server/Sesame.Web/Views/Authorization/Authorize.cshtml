@@ -1,0 +1,102 @@
+﻿@model WebApplication1.ViewModels.Authorization.AuthorizeViewModel
+@{
+    ViewData["Title"] = "About";
+}
+
+
+<main role="main">
+
+    
+    <div class="jumbotron">
+        <h1>Authorization</h1>
+
+        <p class="lead text-left">Do you want to grant <strong>@Model.ApplicationName</strong> access to your data? (scopes requested: @Model.Scope)</p>
+
+        <form method="post" id="authenticationform">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="redirect_uri" value="@Model.RedirectUri" />
+            <input type="hidden" name="request_id" value="@Model.RequestId" />
+
+            <input   class="btn btn-lg btn-success" name="submit.Accept" type="submit" value="Yes" />
+            @*<input class="btn btn-lg btn-danger" name="submit.Deny" type="submit" value="No" />*@
+        </form>
+    </div>
+
+
+    <div id="welcome-screen">
+        <div class="row" align="center">
+            <div class="col-sm-12">
+                <p> Welcome</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="profile-screen">
+        <div class="row" align="center">
+            <div class="col-sm-12">
+
+                <form class="login-group">
+                    <label for="pin" id="pinload">Loading</label>
+                    <label for="pin">What's your pin?</label>
+                    <input type="number" name="pin" id="pin" autofocus />
+
+                    <button type="submit" id="pinsubmit" class="btn btn-default">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="verify-screen">
+        <div class="row" align="center">
+            <div class="col-sm-12">
+
+                <p id="verify-prompt"></p>
+            </div>
+        </div>
+        <div class="row" align="center">
+            <div class="col-sm-12">
+                <div id="viz">
+                    <canvas id="analyser" height="50"></canvas>
+                    <canvas id="wavedisplay" height="50"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="row  " align="center">
+            <div class="col-sm-12">
+                <p id="verificationphrase"> </p>
+                <p id="message"></p>
+            </div>
+        </div>
+
+        <div class="row" align="center">
+            <div class="col-sm-12">
+                <div id="controls">
+                    <img id="record" src="/images/mic128.png" onclick="toggleRecording(this);">
+                    <a id="save" href="#">
+                        <img src="/images/save.svg">
+                    </a>
+                </div>
+
+            </div>
+
+
+
+        </div>
+    </div>
+
+
+</main>
+
+@section scripts{
+    <script src="~/js/audiodisplay.js"></script>
+    <script src="~/js/recorderjs/recorder.js"></script>
+    <script src="~/js/login.js"></script>
+    <script src="~/js/main.js"></script>
+}
+
+
+
+
