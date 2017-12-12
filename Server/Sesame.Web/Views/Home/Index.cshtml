@@ -1,0 +1,90 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+
+
+<main role="main">
+
+    <div class="jumbotron">
+        <div class="container">
+            <h1 class="display-3">Login </h1>
+
+        </div>
+    </div>
+
+
+
+    <div id="welcome-screen">
+        <div class="row" align="center">
+            <div class="col-sm-12">
+                <p> Welcome</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="profile-screen">
+        <div class="row" align="center">
+            <div class="col-sm-12">
+
+                <form class="login-group">
+                    <label for="pin" id="pinload">Loading</label>
+                    <label for="pin">What's your pin?</label>
+                    <input type="text" name="pin" id="pin"  autofocus/>
+
+                    <button type="submit" id="pinsubmit" class="btn btn-default" >Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="verify-screen">
+        <div class="row" align="center">
+            <div class="col-sm-12">
+
+                <p id="verify-prompt"></p>
+            </div>
+        </div>
+        <div class="row" align="center">
+            <div class="col-sm-12">
+                <div id="viz">
+                    <canvas id="analyser" height="50"></canvas>
+                    <canvas id="wavedisplay" height="50"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="row  " align="center">
+            <div class="col-sm-12">
+                <p id="verificationphrase"> </p>
+                <p id="message"></p>
+            </div>
+        </div>
+
+        <div class="row" align="center">
+            <div class="col-sm-12">
+                <div id="controls">
+                    <img id="record" src="./images/mic128.png" onclick="toggleRecording(this);">
+                    <a id="save" href="#">
+                        <img src="./images/save.svg">
+                    </a>
+                </div>
+
+            </div>
+
+
+
+        </div>
+    </div>
+
+
+</main>
+
+@section scripts{
+    <script src="~/js/audiodisplay.js"></script>
+    <script src="~/js/recorderjs/recorder.js"></script>
+    <script src="~/js/login.js"></script>
+    <script src="~/js/main.js"></script>
+}

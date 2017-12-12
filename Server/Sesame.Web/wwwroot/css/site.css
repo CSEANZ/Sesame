@@ -1,0 +1,344 @@
+﻿body {
+    /*padding-top: 50px;*/
+    padding-bottom: 20px;
+}
+
+/* Wrapping element */
+/* Set some basic padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/*#verificationphrases_selector {
+    width: 100%;
+    padding-bottom:10px;
+}*/
+#verificationphrase {
+    background-color: black;
+    color: white;
+    padding: 10px 10px;
+    display: inline-block;
+    background: #202020;
+    width: 90%;
+    margin: auto;
+    display: block;
+}
+
+canvas {
+    display: inline-block;
+    background: #202020;
+    width: 90%;
+    height: 45%;
+    margin: auto;
+    display: block;
+}
+
+#controls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    height: 20%;
+    width: 100%;
+}
+
+#record {
+    height: 15vh;
+}
+
+    #record.recording {
+        background: red;
+        background: -webkit-radial-gradient(center, ellipse cover, #ff0000 0%,lightgrey 75%,lightgrey 100%,#7db9e8 100%);
+        background: -moz-radial-gradient(center, ellipse cover, #ff0000 0%,lightgrey 75%,lightgrey 100%,#7db9e8 100%);
+        background: radial-gradient(center, ellipse cover, #ff0000 0%,lightgrey 75%,lightgrey 100%,#7db9e8 100%);
+    }
+
+#save, #save img {
+    height: 10vh;
+}
+
+#save {
+    opacity: 0.25;
+}
+
+    #save[download] {
+        opacity: 1;
+    }
+
+/*@font-face {
+    font-family: fmg-icon;
+    src: url(../font/ico-south32.eot);
+    src: url(../font/ico-south32.eot#iefix) format("embedded-opentype"), url(../font/ico-south32.ttf) format("truetype"), url(../font/ico-south32.woff) format("woff"), url(../font/ico-south32.svg#ico-south32) format("svg");
+    font-weight: 400;
+    font-style: normal
+}
+
+@font-face {
+    font-family: Glyphicons Halflings;
+    src: url(../font/glyphicons-halflings-regular.eot);
+    src: url(../font/glyphicons-halflings-regular.eot?#iefix) format("embedded-opentype"), url(../font/glyphicons-halflings-regular.woff2) format("woff2"), url(../font/glyphicons-halflings-regular.woff) format("woff"), url(../font/glyphicons-halflings-regular.ttf) format("truetype"), url(../font/glyphicons-halflings-regular.svg#glyphicons_halflingsregular) format("svg")
+}
+
+@font-face {
+    font-family: Graphik;
+    src: url(../font/Graphik-Medium-Web.eot);
+    src: url(../font/Graphik-Medium-Web.eot?#iefix) format("embedded-opentype"), url(../font/Graphik-Medium-Web.woff2) format("woff2"), url(../font/Graphik-Medium-Web.woff) format("woff");
+    font-weight: 500;
+    font-style: normal;
+    font-stretch: normal
+}
+
+@font-face {
+    font-family: Graphik;
+    src: url(../font/Graphik-Regular-Web.eot);
+    src: url(../font/Graphik-Regular-Web.eot?#iefix) format("embedded-opentype"), url(../font/Graphik-Regular-Web.woff2) format("woff2"), url(../font/Graphik-Regular-Web.woff) format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-stretch: normal
+}
+
+@font-face {
+    font-family: Graphik;
+    src: url(../font/Graphik-MediumItalic-Web.eot);
+    src: url(../font/Graphik-MediumItalic-Web.eot?#iefix) format("embedded-opentype"), url(../font/Graphik-MediumItalic-Web.woff2) format("woff2"), url(../font/Graphik-MediumItalic-Web.woff) format("woff");
+    font-weight: 500;
+    font-style: italic;
+    font-stretch: normal
+}
+
+@font-face {
+    font-family: Graphik;
+    src: url(../font/Graphik-RegularItalic-Web.eot);
+    src: url(../font/Graphik-RegularItalic-Web.eot?#iefix) format("embedded-opentype"), url(../font/Graphik-RegularItalic-Web.woff2) format("woff2"), url(../font/Graphik-RegularItalic-Web.woff) format("woff");
+    font-weight: 400;
+    font-style: italic;
+    font-stretch: normal
+}*/
+
+html {
+    font-family: sans-serif;
+    font-size: 10px;
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent
+}
+
+body {
+    margin: 0;
+    font-family: Graphik, sans-serif;
+    font-size: 20px;
+    color: #2e3639;
+    background-color: #fff
+}
+
+img {
+    /*vertical-align: middle;*/
+    border: 0;
+    display: block;
+    max-width: 100%
+}
+
+*,
+:after,
+:before {
+    box-sizing: border-box
+}
+
+.container {
+    /*width: 1170px;*/
+    margin-right: auto;
+    margin-left: auto;
+    padding-left: 15px;
+    padding-right: 15px
+}
+
+    .container:after,
+    .container:before {
+        content: " ";
+        display: table
+    }
+
+    .container:after {
+        clear: both
+    }
+
+.row {
+    margin-left: -15px;
+    margin-right: -15px
+}
+
+    .row:after,
+    .row:before {
+        content: " ";
+        display: table
+    }
+
+    .row:after {
+        clear: both
+    }
+
+.container {
+    /*max-width: 1270px;*/
+    margin: 0 auto
+}
+
+.documents--table {
+    border-top: 1px solid #e1e1e1
+}
+
+
+/*Page header*/
+#header {
+    display: block;
+    background: #2e3639;
+    position: relative
+}
+
+    #header:after,
+    #header:before {
+        content: " ";
+        display: table
+    }
+
+    #header:after {
+        clear: both
+    }
+
+#logo {
+    background: #2e3639;
+    float: left;
+    font-size: 0;
+    margin: 0 25px -15px;
+    padding: 20px;
+    position: relative;
+    width: 114px;
+    z-index: 9;
+    margin-bottom: -32px;
+    /*margin-left: calc((100% - 1600px) /2);*/
+    margin-top: 0;
+}
+
+    #logo a,
+    #logo img {
+        display: block;
+        width: 100%
+    }
+
+#jimmylogo {
+    background: #2e3639;
+    float: right;
+    font-size: 0;
+    margin: 0 25px -15px;
+    padding: 10px;
+    position: relative;
+    width: 70px;
+    z-index: 9
+}
+
+/*Page title*/
+h1 {
+    font-family: Graphik, sans-serif;
+    font-weight: 700;
+    font-size: 2em;
+    line-height: 1;
+    letter-spacing: -.7px;
+    color: inherit;
+    margin: .67em 0;
+    margin-top: 32px;
+    margin-bottom: 16px;
+    font-size: 60px;
+    text-transform: uppercase
+}
+
+/*Page body*/
+#pagebody {
+    font-family: Graphik, sans-serif;
+    line-height: 1.6;
+    margin: 0px;
+}
+
+p {
+    margin: 0px;
+}
+
+#jimmyphoto,
+#pagebody {
+    position: relative;
+    min-height: 1px;
+    padding-left: 15px;
+    padding-right: 15px;
+    float: left
+}
+
+#jimmyphoto {
+    width: 25%
+}
+
+#pagebody {
+    width: 75%
+}
+
+/*Hyper links*/
+a {
+    color: #2e3639;
+    text-decoration: none;
+    background-color: transparent
+}
+
+    a:focus,
+    a:hover {
+        color: #2e3639;
+        text-decoration: underline
+    }
+
+    a:focus {
+        outline: 5px auto -webkit-focus-ring-color;
+        outline-offset: -2px
+    }
+
+.verification-circle {
+    display: inline-block;
+    width: 35px;
+    margin: 15px;
+    height: 35px;
+    border: 1px solid #1a1a1a;
+    border-radius: 50%;
+    font-size: 15px;
+    color: #1a1a1a;
+    line-height: 30px;
+    text-align: center;
+    background: #fff;
+}
+
+.verification-circle-success {
+    background: #a5ce00;
+    border: none
+}
+
+.verification-circle-error {
+    background: #ba141a;
+    border: none;
+}
+
+#verificationphrases_selector {
+    width: 94%;
+    margin-bottom: 10px;
+}
+
+.pin-info {
+    background-color: #a5ce00;
+    width: 90%;
+    padding: 10px;
+}
+#message {
+    width: 90%;
+    padding: 10px;
+}
+.accept {
+    background: #a5ce00;
+}
+
+.reject {
+    background: #ba141a;
+}
