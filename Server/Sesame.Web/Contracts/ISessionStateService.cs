@@ -1,4 +1,4 @@
-﻿namespace Sesame.Web.Services
+﻿namespace Sesame.Web.Contracts
 {
     public interface ISessionStateService
     {

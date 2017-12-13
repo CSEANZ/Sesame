@@ -15,7 +15,10 @@ namespace Sesame.Web.DatabaseContexts
             
         }
 
-        public DbSet<MappedAuthentication> Maps { get; set; }
+        public DbSet<MappedAuthentication> UserMaps { get; set; }
+        public DbSet<PinMap> PinMaps { get; set; }
+        public DbSet<PhraseMap> PhraseMaps { get; set; }
+        public DbSet<SimpleClaimDb> SimpleClaims { get; set; }
     }
 
     public class MappedAuthentication
@@ -25,6 +28,28 @@ namespace Sesame.Web.DatabaseContexts
         public string UserPrinipleName { get; set; }
         public SpeakerProfileType ProfileType { get; set; }
         public string ProfileId { get; set; }
+        
+    }
+
+    public class PinMap
+    {
+        [Key]
+        public Guid PinMapId { get; set; }
+        public string UserPrinipleName { get; set; }
         public string Pin { get; set; }
+    }
+
+    public class PhraseMap
+    {
+        [Key]
+        public Guid PhraseMapId { get; set; }
+        public string UserPrinipleName { get; set; }
+        public string Phrase { get; set; }
+    }
+
+    public class SimpleClaimDb : SimpleClaim
+    {
+        [Key]
+        public Guid SimpleClaimId { get; set; }
     }
 }

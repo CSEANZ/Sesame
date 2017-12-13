@@ -14,6 +14,7 @@ using Universal.Common.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Sesame.Web.Contracts;
 using Sesame.Web.Services;
 
 

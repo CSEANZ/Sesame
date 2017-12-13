@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using OpenIddict.Core;
 using OpenIddict.Models;
+using Sesame.Web.Contracts;
 using Sesame.Web.Helpers;
 using Sesame.Web.ViewModels.Authorization;
 using Sesame.Web.ViewModels.Shared;
