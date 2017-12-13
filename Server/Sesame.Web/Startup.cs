@@ -22,6 +22,7 @@ using OpenIddict.Models;
 using Sesame.Web.Extensions;
 using Sesame.Web.Helpers;
 using Microsoft.AspNetCore.Http;
+using Sesame.Web.Contracts;
 using Sesame.Web.DatabaseContexts;
 using Standard.Microsoft.CognitiveServices.SpeakerRecognition;
 
