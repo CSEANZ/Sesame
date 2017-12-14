@@ -28,11 +28,14 @@ namespace Sesame.Web.Controllers
         private ISessionStateService mSessionStateService;
 
         private static List<string> mVerificationPhrases = null;
+        private IPersistentStorageService _persistantStorageService;
 
         public VerificationProfilesController(IConfiguration configuration, 
             ISessionStateService sessionStateService,
-            SpeakerRecognitionClient mSpeakerRecognitionClient)
+            SpeakerRecognitionClient mSpeakerRecognitionClient,
+            IPersistentStorageService persistantStorageService)
         {
+            _persistantStorageService = persistantStorageService;
             this.mSpeakerRecognitionClient = mSpeakerRecognitionClient;
             mSessionStateService = sessionStateService;
         }
