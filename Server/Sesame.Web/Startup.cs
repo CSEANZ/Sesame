@@ -51,6 +51,8 @@ namespace Sesame.Web
 
             services.AddTransient<ITokenHelper, TokenHelper>();
 
+            services.AddSingleton<IPersistentStorageService, PersistentStorageService>();
+
             services.AddSingleton(
                 new SpeakerRecognitionClient(Configuration["SpeakerRecognitionKey"]));
 
