@@ -19,10 +19,8 @@ namespace Sesame.Web.Extensions
     {
         public static void AddOpenIdConnectIntercepts(this OpenIdConnectOptions opts)
         {
-
             opts.Events = new OpenIdConnectEvents
             {
-                // @Jordan, do you want any other events handled here?
                 OnAuthorizationCodeReceived = async ctx =>
                 {
                     var request = ctx.HttpContext.Request;
