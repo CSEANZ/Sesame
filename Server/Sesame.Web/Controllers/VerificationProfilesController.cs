@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Sesame.Web.Contracts;
+using Sesame.Web.Models;
 using Sesame.Web.Services;
 
 
@@ -23,14 +24,14 @@ namespace Sesame.Web.Controllers
     [Route("api/[controller]")]
     public class VerificationProfilesController : Controller
     {
-      
+
         private SpeakerRecognitionClient mSpeakerRecognitionClient;
         private ISessionStateService mSessionStateService;
 
         private static List<string> mVerificationPhrases = null;
         private IPersistentStorageService _persistantStorageService;
 
-        public VerificationProfilesController(IConfiguration configuration, 
+        public VerificationProfilesController(IConfiguration configuration,
             ISessionStateService sessionStateService,
             SpeakerRecognitionClient mSpeakerRecognitionClient,
             IPersistentStorageService persistantStorageService)
@@ -40,7 +41,7 @@ namespace Sesame.Web.Controllers
             mSessionStateService = sessionStateService;
         }
 
-        
+
         /// <summary>
         /// Gets a list of phrases that the user can choose from the verify their voice. 
         /// </summary>
@@ -65,7 +66,7 @@ namespace Sesame.Web.Controllers
 
             return Ok(mVerificationPhrases);
         }
-        
+
         /// <summary>
         /// Checks to see if they user has a verification profile already and returns it if found
         /// If not - it creates it
@@ -81,12 +82,12 @@ namespace Sesame.Web.Controllers
 
             try
             {
-                result = await PersistentStorage.GetSpeakerProfileAsync(userPrincipalName, SpeakerProfileType.Verification);
+                result = await _persistantStorageService.GetSpeakerProfileAsync(userPrincipalName, SpeakerProfileType.Verification);
 
                 if (result.IsNullOrEmpty())
                 {
                     result = await mSpeakerRecognitionClient.CreateVerificationProfileAsync();
-                    await PersistentStorage.CreateSpeakerProfileAsync(userPrincipalName, SpeakerProfileType.Verification, result);
+                    await _persistantStorageService.CreateSpeakerProfileAsync(userPrincipalName, SpeakerProfileType.Verification, result);
                 }
                 return Ok(result);
             }
@@ -106,7 +107,7 @@ namespace Sesame.Web.Controllers
 
             try
             {
-                var verificationProfileId = await PersistentStorage.GetSpeakerProfileAsync(userPrincipalName, SpeakerProfileType.Verification);
+                var verificationProfileId = await _persistantStorageService.GetSpeakerProfileAsync(userPrincipalName, SpeakerProfileType.Verification);
                 if (verificationProfileId == null)
                 {
                     return StatusCode(400, "new user");
@@ -140,7 +141,7 @@ namespace Sesame.Web.Controllers
         // TODO This really should be split into two - one to get and one to assign
         // api/verificationProfiles/{userPrincipalName}/assign
         [Authorize]
-        [HttpGet,HttpPost]
+        [HttpGet, HttpPost]
         [Route("assign")]
         public async Task<IActionResult> AssignSpeakerPinAsync()
         {
@@ -148,13 +149,13 @@ namespace Sesame.Web.Controllers
 
             try
             {
-                int? existingPin = await PersistentStorage.GetPinBySpeakerAsync(userPrincipalName);
+                string existingPin = await _persistantStorageService.GetPinBySpeakerAsync(userPrincipalName);
                 if (existingPin != null)
                 {
-                    return Ok(existingPin.Value);
+                    return Ok(existingPin);
                 }
 
-                int result = await PersistentStorage.EnrollSpeakerPin(userPrincipalName);
+                string result = await _persistantStorageService.EnrollSpeakerPin(userPrincipalName);
 
                 return Ok(result);
             }
@@ -181,7 +182,7 @@ namespace Sesame.Web.Controllers
                 {
                     var result = await mSpeakerRecognitionClient.CreateVerificationProfileEnrollmentAsync(verificationProfileId, waveBytes);
 
-                    await PersistentStorage.UpdateSpeakerVerificationPhraseAsync(userPrincipalName, result.Phrase);
+                    await _persistantStorageService.UpdateSpeakerVerificationPhraseAsync(userPrincipalName, result.Phrase);
                     return Ok(result);
                 }
                 catch (HttpException e)
@@ -199,10 +200,9 @@ namespace Sesame.Web.Controllers
         {
             try
             {
-                int parsedPin = Int32.Parse(pin);
-                string userPrincipalName = await PersistentStorage.GetSpeakerByPinAsync(parsedPin);
+                string userPrincipalName = await _persistantStorageService.GetSpeakerByPinAsync(pin);
 
-                return Ok(new { Phrase = await PersistentStorage.GetSpeakerVerificationPhraseAsync(userPrincipalName) });
+                return Ok(new { Phrase = await _persistantStorageService.GetSpeakerVerificationPhraseAsync(userPrincipalName) });
             }
             catch (Exception e)
             {
@@ -221,7 +221,7 @@ namespace Sesame.Web.Controllers
 
             try
             {
-                await PersistentStorage.UpdateSpeakerVerificationPhraseAsync(userPrincipalName, verificationPhrase);
+                await _persistantStorageService.UpdateSpeakerVerificationPhraseAsync(userPrincipalName, verificationPhrase);
                 return Ok();
             }
             catch (Exception e)
@@ -251,34 +251,14 @@ namespace Sesame.Web.Controllers
         [Route("{pin}/upn")]
         public async Task<IActionResult> GetSpeakerUserPrincipalNameAsync(string pin)
         {
-            int parsedPin;
-            try
-            {
-                parsedPin = Int32.Parse(pin);
-            }
-            catch
-            {
-                return StatusCode(400, "A valid PIN was not provided.");
-            }
-
-            return Ok(await PersistentStorage.GetSpeakerByPinAsync(parsedPin));
+            return Ok(await _persistantStorageService.GetSpeakerByPinAsync(pin));
         }
 
         [HttpGet]
         [Route("{pin}/verifypin")]
         public async Task<IActionResult> VerifyPinAsync(string pin)
         {
-            int parsedPin;
-            try
-            {
-                parsedPin = Int32.Parse(pin);
-            }
-            catch
-            {
-                return Ok(new { Success = false });
-            }
-
-            return Ok(new { Success = !(await PersistentStorage.GetSpeakerByPinAsync(parsedPin)).IsNullOrEmpty() });
+            return Ok(new { Success = !(await _persistantStorageService.GetSpeakerByPinAsync(pin)).IsNullOrEmpty() });
         }
 
         [HttpPost]
@@ -293,21 +273,12 @@ namespace Sesame.Web.Controllers
                 try
                 {
                     //find it based on pin
-                    int parsedPin;
-                    try
-                    {
-                        parsedPin = Int32.Parse(pin);
-                    }
-                    catch
-                    {
-                        // throw new ArgumentException("A valid PIN was not provided.");
-                        return StatusCode(400, "A valid PIN was not provided.");
-                    }
+
 
                     string verificationProfileId;
                     try
                     {
-                        verificationProfileId = await PersistentStorage.GetSpeakerVerificationProfileByPinAsync(parsedPin);
+                        verificationProfileId = await _persistantStorageService.GetSpeakerVerificationProfileByPinAsync(pin);
                     }
                     catch
                     {
@@ -320,7 +291,7 @@ namespace Sesame.Web.Controllers
                     if (result.Result == "Accept")
                     {
                         mSessionStateService.Set<bool>("VoiceAuthenticated", true);
-                        mSessionStateService.Set<string>("UserPrincipalName", await PersistentStorage.GetSpeakerByPinAsync(parsedPin));
+                        mSessionStateService.Set<string>("UserPrincipalName", await _persistantStorageService.GetSpeakerByPinAsync(pin));
                     }
 
                     return Ok(result);
