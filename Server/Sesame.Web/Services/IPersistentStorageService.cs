@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Sesame.Web.Models;
 
 namespace Sesame.Web.Services
 {

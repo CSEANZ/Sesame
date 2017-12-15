@@ -15,8 +15,11 @@ namespace Sesame.Web.Controllers
     [Authorize]
     public class EnrollmentController : Controller
     {
-        public EnrollmentController()
+        private readonly IPersistentStorageService _persistantStorageService;
+
+        public EnrollmentController(IPersistentStorageService persistantStorageService)
         {
+            _persistantStorageService = persistantStorageService;
         }
 
         /// <summary>
@@ -42,7 +45,7 @@ namespace Sesame.Web.Controllers
             else
             {
                 var simpleClaim = new SimpleClaim() { ObjectIdentifier = objectIdentifierClaim.Value, UserPrincipalName = upnClaim.Value, GivenName = givenNameClaim.Value, Surname = surnameClaim.Value };
-                await PersistentStorage.UpdateClaim(simpleClaim);
+                await _persistantStorageService.UpdateClaim(simpleClaim);
             }
 
             return View();

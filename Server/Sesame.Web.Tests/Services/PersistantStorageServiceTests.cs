@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sesame.Web.DatabaseContexts;
+using Sesame.Web.Models;
 using Sesame.Web.Services;
 
 namespace Sesame.Web.Tests.Services

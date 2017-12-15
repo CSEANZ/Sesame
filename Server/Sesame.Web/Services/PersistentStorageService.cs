@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Sesame.Web.DatabaseContexts;
+using Sesame.Web.Models;
 
 namespace Sesame.Web.Services
 {
@@ -92,16 +93,16 @@ namespace Sesame.Web.Services
 
 
             (from u in _context.UserMaps
-                join p in _context.PinMaps on
-                    u.UserPrinipleName equals p.UserPrinipleName
-                where p.Pin == pin
-                select u).FirstOrDefaultAsync();
+             join p in _context.PinMaps on
+                 u.UserPrinipleName equals p.UserPrinipleName
+             where p.Pin == pin
+             select u).FirstOrDefaultAsync();
 
-                //(from p in _context.PinMaps
-                //join u in _context.UserMaps on
-                //    p.UserPrinipleName equals u.UserPrinipleName
-                //where p.Pin == pin
-                //select u).FirstOrDefaultAsync();
+            //(from p in _context.PinMaps
+            //join u in _context.UserMaps on
+            //    p.UserPrinipleName equals u.UserPrinipleName
+            //where p.Pin == pin
+            //select u).FirstOrDefaultAsync();
 
 
             return existing?.UserPrinipleName;
