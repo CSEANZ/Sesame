@@ -1,52 +1,46 @@
-
-
 var enrollindex = 0;
+
 $(document).ready(function () {
+    loadVerificationPhrases();
 
+    createVerificationProfile();
 
-    loadverificationphrases();
-
-    createverificationprofile();
-
-    loadenrollmenthistory();
-
+    loadEnrollmentHistory();
 });
 
-
-function actionsAfterStopListening(blob) {
-    doneEncoding(blob);
-    var id = $.cookie('verificationProfileId');
-    createverificationprofileenrollment(id, blob);
-}
 $("#verificationphrases_selector").change(function () {
     $('#verificationphrase').text($(this).val());
 });
 
+function actionsAfterStopListening(blob) {
+    doneEncoding(blob);
 
-function assignpin() {
+    var id = $.cookie('verificationProfileId');
 
+    createVerificationProfileEnrollment(id, blob);
+}
 
+function assignPin() {
 
     $.ajax({
         url: VerificationSettings.assign,
         method: 'GET',
         dataType: 'json',
-
         success: function (data) {
             if (data) {
                 console.log(data);
+
                 var pin = data;
-                //show pin
+
                 $('.pin-info').removeClass("hidden");
+
                 $('#pin').text(pin);
             }
         }
     });
 }
 
-
-function loadenrollmenthistory() {
-
+function loadEnrollmentHistory() {
 
     $.ajax({
         url: VerificationSettings.profile,
@@ -55,43 +49,38 @@ function loadenrollmenthistory() {
 
         success: function (data) {
             if (data) {
-                updateenrollmentinfo(data);
+                updateEnrollmentInfo(data);
             }
         }
     });
-
 }
 
-
-function loadverificationphrases() {
-
+function loadVerificationPhrases() {
 
     $.ajax({
         url: VerificationSettings.loadverificationphrases + '?locale=' + VerificationSettings.locale,
         method: 'GET',
         dataType: 'json',
         error(xhr, status, error) {
-
             console.log("error");
-
         },
         success: function (data) {
             if (data) {
                 console.log(data);
+
                 $.each(data, function (index, item) {
                     if (item) {
                         console.log(item);
+
                         $("#verificationphrases_selector").append('<option value="' + item + '">' + item + '</option>');
                     }
-
                 });
             }
         }
     });
 }
 
-function createverificationprofile() {
-
+function createVerificationProfile() {
 
     $.ajax({
         url: VerificationSettings.createverificationprofile,
@@ -102,12 +91,9 @@ function createverificationprofile() {
             "locale": VerificationSettings.locale
         },
         error(xhr, status, error) {
-
             console.log("error");
-
         },
         success: function (data) {
-
             if (data) {
                 console.log(data);
                 var verificationProfileId = data;
@@ -118,60 +104,58 @@ function createverificationprofile() {
     });
 }
 
-function updateenrollmentinfo(data) {
+function updateEnrollmentInfo(data) {
 
     $('#enrollmessage').hide();
 
     $('#verificationphrase').text(data.phrase);
 
     var verificationCircles = $('div.verification-circle');
+
     for (i = 0; i < data.enrollmentsCount; i++) {
         $(verificationCircles[i]).addClass('verification-circle-success');
         $(verificationCircles[i]).removeClass('verification-circle-error');
-
     }
 
     var remainingEnrollments = data.remainingEnrollments;
+
     if (remainingEnrollments === undefined) {
         remainingEnrollments = data.remainingEnrollmentsCount;
     }
-
-
 
     $('#remainingEnrollments').text(remainingEnrollments);
     $('#enrollmentsCount').text(data.enrollmentsCount);
 
     if (remainingEnrollments <= 0) {
-
-        //call api to get pin
-        assignpin();
-
+        assignPin();
     }
-
-
 }
-function createverificationprofileenrollment(verificationProfileId, blob, index = 1) {
+
+function createVerificationProfileEnrollment(verificationProfileId, blob, index = 1) {
     /*
-  The audio file should be at least 1-second-long and no longer than 15 seconds. Each speaker must provide at least three enrollments to the service.
-  The audio file format must meet the following requirements.
-  Container	WAV
-  Encoding	PCM
-  Rate	16K
-  Sample Format	16 bit
-  Channels	Mono
-  */
+        The audio file should be at least 1-second-long and no longer than 15 seconds. Each speaker must provide at least three enrollments to the service.
+        The audio file format must meet the following requirements.
 
+        - Container:      WAV
+        - Encoding:       PCM
+        - Rate:           16K
+        - Sample Format:  16 bit
+        - Channels:       Mono
+    */
     var reader = new FileReader();
-    reader.onload = function (event) {
 
+    reader.onload = function (event) {
         var freader = new FileReader();
+
         freader.onload = function (e) {
             console.log(e.target.result);
+
             var body = e.target.result;
+
             var enrollurl = VerificationSettings.enroll.replace("{verificationProfileId}", verificationProfileId);
+
             $.ajax({
                 type: 'POST',
-
                 url: enrollurl,
                 headers: {
                     'Content-type': 'application/octet-stream'
@@ -190,39 +174,30 @@ function createverificationprofileenrollment(verificationProfileId, blob, index 
                     }
 
                     var verificationCircles = $('div.verification-circle');
+
                     $(verificationCircles[enrollindex]).addClass('verification-circle-error');
-
-
                 },
                 success: function (data) {
                     console.log(data);
 
-                    updateenrollmentinfo(data);
+                    updateEnrollmentInfo(data);
 
                     var remainingEnrollments = data.remainingEnrollments;
+
                     if (!remainingEnrollments) {
                         remainingEnrollments = data.remainingEnrollmentsCount;
                     }
 
                     if (remainingEnrollments > 0) {
-
-
-
-
-
-
                         enrollindex = enrollindex + 1;
                     }
-
                 }
             });
         };
-        freader.readAsArrayBuffer(blob);
 
+        freader.readAsArrayBuffer(blob);
     }
+
     //start the reading process.
     reader.readAsDataURL(blob);
-
 }
-
-

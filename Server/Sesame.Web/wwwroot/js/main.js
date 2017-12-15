@@ -75,17 +75,17 @@ function guid() {
 }
 
 function doneEncoding(blob) {
-  
     filename = guid() + ".wav";
 
     var url = (window.URL || window.webkitURL).createObjectURL(blob);
+
     var link = document.getElementById("save");
+
     link.href = url;
+
     link.download = filename || 'output.wav';
+
     console.log(blob);
-
- 
-
 }
 
 function startListening() {
