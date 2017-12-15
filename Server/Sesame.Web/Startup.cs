@@ -35,7 +35,9 @@ namespace Sesame.Web
 
         public Startup(IHostingEnvironment hostingEnvironment)
         {
-            var builder = new ConfigurationBuilder();
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(hostingEnvironment.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
             if (hostingEnvironment.IsDevelopment())
             {
@@ -60,8 +62,7 @@ namespace Sesame.Web
 
             services.AddSingleton<IPersistentStorageService, PersistentStorageService>();
 
-            services.AddSingleton(
-                new SpeakerRecognitionClient(Configuration["SpeakerRecognitionKey"]));
+            services.AddSingleton(new SpeakerRecognitionClient(Configuration["SpeakerRecognitionKey"]));
 
             if (HostingEnvironment.IsDevelopment())
             {
@@ -80,7 +81,6 @@ namespace Sesame.Web
                 });
             }
 
-
             //See readme on how to add connections strings to your private User Secrets
             //See readme on how to initialise this database
             //this database is used to store session state in a way that works across scalable servers
@@ -90,7 +90,6 @@ namespace Sesame.Web
                 options.SchemaName = "dbo";
                 options.TableName = "State";
             });
-
            
             services.AddSession(options =>
             {
@@ -119,8 +118,6 @@ namespace Sesame.Web
                 options.UseOpenIddict();
             });
 
-           
-
             //Prepare for AAD authentication (for the enrolment side)
             services.Configure<IdentityOptions>(options =>
             {
@@ -131,7 +128,6 @@ namespace Sesame.Web
 
             //call the extension method to set up OpenIddict
             services.ConfigureOpenIddict();
-
 
             //Prepare for AAD authentication (for the enrolment side)
             services.AddAuthentication(sharedOptions =>
