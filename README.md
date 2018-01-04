@@ -19,8 +19,7 @@ The core tenet of the approach taken in this solution is to ensure it doesn't ti
 
 Take the example of a bot website that is used in a situation where a user cannot interact with a keyboard to enter their authentication information - perhaps they are wearing safety equipment like gloves and goggles. 
 
-![new flow](https://user-images.githubusercontent.com/5225782/34585746-308bf1fe-f1f5-11e7-9641-f4cff054fab3.jpg)
-
+![new flow](https://user-images.githubusercontent.com/5225782/34585801-6c56cbdc-f1f5-11e7-926e-36f1ef5c93e4.jpg)
 
 *Example flow for a bot client site*
 
