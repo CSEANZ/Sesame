@@ -372,12 +372,6 @@ options.UseJsonWebTokens();
 options.AddEphemeralSigningKey();
 ```
 
-### Voice print Id (how to record the voice print id etc)
-SVB
-### Token refresh (why, how, distro cache etc)
-SVB
-## Samples (links to sample sites, brief look at how they hook in to Sesame)
-
 There are two samples provided:
 - [ASP.NET Core 2](https://github.com/CSEANZ/Sesame/tree/master/Samples/Core)
 - [MVC5](https://github.com/CSEANZ/Sesame/tree/master/Samples/Owin)
@@ -410,16 +404,19 @@ public void ConfigureServices(IServiceCollection services)
 ```csharp
 public void Configure(string name, OpenIdConnectOptions options)
 {
-    options.ClientId = "mvc";
-    options.Authority = "https://localhost:44398/";
+    options.ClientId = _azureOptions.ClientId;
+    options.Authority = _azureOptions.Authority;
+    options.ClientSecret = _azureOptions.ClientSecret;
+    options.CallbackPath = _azureOptions.CallbackPath;
+    
     options.UseTokenLifetime = false;
     
     options.AuthenticationMethod = OpenIdConnectRedirectBehavior.RedirectGet;
     options.ResponseType = "code";
-    options.ClientSecret =
-        "901564A5-E7FE-42CB-B10D-61EF6A8F3654";
-    options.CallbackPath = "/signin-oidc";
+    
     options.RequireHttpsMetadata = false;
+
+    //so we can acces them later (see HomeController.cs)
     options.SaveTokens = true;
 }
 ```

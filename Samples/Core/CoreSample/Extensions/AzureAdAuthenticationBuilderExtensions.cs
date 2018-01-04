@@ -34,19 +34,12 @@ namespace CoreSample.Extensions
                 options.Authority = _azureOptions.Authority;
                 options.ClientSecret = _azureOptions.ClientSecret;
                 options.CallbackPath = _azureOptions.CallbackPath;
-                //options.UseTokenLifetime = true;
-                //options.CallbackPath = _azureOptions.CallbackPath;
-                //options.RequireHttpsMetadata = false;
-
-                //options.ClientId = "mvc";
-                //options.Authority = "https://localhost:44398/";
+                
                 options.UseTokenLifetime = false;
                 
                 options.AuthenticationMethod = OpenIdConnectRedirectBehavior.RedirectGet;
                 options.ResponseType = "code";
-               // options.ClientSecret =
-                   // "901564A5-E7FE-42CB-B10D-61EF6A8F3654";
-               // options.CallbackPath = "/signin-oidc";
+               
                 options.RequireHttpsMetadata = false;
 
                 //so we can acces them later (see HomeController.cs)
