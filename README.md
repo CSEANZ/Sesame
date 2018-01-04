@@ -29,9 +29,17 @@ Once the user has been logged in to AAD they are asked to enrol for voice identi
 
 Once successful the user is presented with a unique PIN which can be later used to help identify them. 
 
+Enrolment can be done up to 90 days (by default) before the user would like to log in.  
+
 ### Verification
 
-As mentioned this system may be suited to a range of scenarios, but in this case the example is a bot that is being used in an environment where the user cannot type or be identified using their face. The user must authenticate and commuicate with the bot using only their voice. 
+This system may be suited to a range of scenarios but in this case the example is a bot that is being used in an environment where the user cannot type or be identified using their face. The user must authenticate and commuicate with the bot using only their voice. In this example, the bot must be used in an authenticated state, it cannot be used by a single account that everyone uses. 
+
+During the verification stage, the user approaches the "field station" and kicks off the login process (perhaps by pressing space bar - something that they can do whilst wearing protective equipment in this example). 
+
+Upon activation the user is redirected from the client site to the authentication site (where they earlier enrolled) via OpenId Connect OAuth 2 flows.  Instead of being asked to enroll the user is asked to say their PIN (that was provided during enrolment) aloud. 
+
+If the PIN is accepted then the user will be presented with the phrase they enrolled their voice with and asked the repeat it. If this is successful, the user will be redirected back to the original site and will be authenticated.  
 
 
 
@@ -39,20 +47,3 @@ As mentioned this system may be suited to a range of scenarios, but in this case
 
 This mode of authentication is weaker than regular 2FA. It is suggested that you limit the capabilities of the client app appropriately. 
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
-
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
-
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
-
-If you want to learn more about creating good readme files then refer the following [guidelines](https://www.visualstudio.com/en-us/docs/git/create-a-readme). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
