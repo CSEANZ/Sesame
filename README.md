@@ -7,6 +7,8 @@ This project allows you to add voice identification to any site compatible with 
 
 The core tenet of the approach taken in this solution is to ensure it doesn't tightly bind our solution to the client site's source code. The end result is an [OAuth2](https://oauth.net/2/)/[OpenID Connect](http://openid.net/connect/) compatible authentication web site that can be used to authenticate using voice from any website that supports an OpenID Connect based authentication flow. 
 
+The project was developed as part of a collaboration by [South32](https://www.south32.net/) and Microsoft engineers.  
+
 ## Key Technologies
 
 - [Speaker Recognition API](https://azure.microsoft.com/en-au/services/cognitive-services/speaker-recognition/)
