@@ -5,7 +5,7 @@ A bolt-on voice identification and authentication service for any App or API.
 
 This project allows you to add voice identification to any site compatible with OpenIdConnect based authentication flows. 
 
-A core tenet of our approach was to ensure we didn't tightly bind our solution to the client site's source code. The end result is an [OAuth2](https://oauth.net/2/)/[OpenID Connect](http://openid.net/connect/) compatible authentication web site that can be used to authenticate using voice from any website that supports an OpenID Connect based authentication flow. 
+The core tenet of the approach taken in this solution is to ensure it doesn't tightly bind our solution to the client site's source code. The end result is an [OAuth2](https://oauth.net/2/)/[OpenID Connect](http://openid.net/connect/) compatible authentication web site that can be used to authenticate using voice from any website that supports an OpenID Connect based authentication flow. 
 
 [Example](https://github.com/CSEANZ/Sesame/tree/master/Samples) client apps provided are for ASP.NET Core and ASP.NET Classic MVC. 
 
@@ -21,9 +21,19 @@ There are two main stages to the process - enrolment and verification.
 
 ### Enrolment
 
-Before a user may authenticate with the system by using their voice they must enrol.  This involves logging in to [Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/active-directory-whatis) and saving the details of the login (refresh token, user claims) for later.  It does not save any further access tokens or otherwise that could be used to access downstream services such as the Microsoft Graph. 
+Before a user may authenticate with the system by using their voice they must enrol. Enrolment is performed from a PC in any environnement (i.e without personal protective equipment - like an office).
 
-Once the user has been logged in to AAD they are asked to enrol for voice identification. This process involves selecting a pre-generated 
+Enrolment involves logging in to [Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/active-directory-whatis) and saving the details of the login (refresh token, user claims) for later.  It does not save any further access tokens or otherwise that could be used to access downstream services such as the Microsoft Graph. 
+
+Once the user has been logged in to AAD they are asked to enrol for voice identification. This process involves selecting a pre-generated phrase and repeating it a number of times.
+
+Once successful the user is presented with a unique PIN which can be later used to help identify them. 
+
+### Verification
+
+As mentioned this system may be suited to a range of scenarios, but in this case the example is a bot that is being used in an environment where the user cannot type or be identified using their face. The user must authenticate and commuicate with the bot using only their voice. 
+
+
 
 ### A note about security
 
