@@ -422,3 +422,5 @@ public void Configure(string name, OpenIdConnectOptions options)
 ```
 
 These options could be added to any ASP.NET Core site to add this style of OpenId Connect based voice authentication.
+
+Configure these options in `appsettings.json`.
