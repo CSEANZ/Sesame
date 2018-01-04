@@ -3,11 +3,17 @@ A bolt-on voice identification and authentication service for any App or API.
 
 ## What is it?
 
-This project allows you to add voice identification to any site compatible with OpenIdConnect based authentication flows. 
+This project allows you to add voice identification to any site compatible with OpenId Connect based authentication flows. It is a OpenId Connect server written in ASP.NET Core 2 that can be used as a base to create your own authentication system. [Example](https://github.com/CSEANZ/Sesame/tree/master/Samples) client apps provided are for ASP.NET Core and ASP.NET Classic MVC. 
 
 The core tenet of the approach taken in this solution is to ensure it doesn't tightly bind our solution to the client site's source code. The end result is an [OAuth2](https://oauth.net/2/)/[OpenID Connect](http://openid.net/connect/) compatible authentication web site that can be used to authenticate using voice from any website that supports an OpenID Connect based authentication flow. 
 
-[Example](https://github.com/CSEANZ/Sesame/tree/master/Samples) client apps provided are for ASP.NET Core and ASP.NET Classic MVC. 
+## Key Technologies
+
+- [Speaker Recognition API](https://azure.microsoft.com/en-au/services/cognitive-services/speaker-recognition/)
+- [ASP.NET Core 2](https://docs.microsoft.com/en-us/aspnet/core/)
+- [OpenIddict](https://github.com/openiddict)
+- [Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/active-directory-whatis)
+
 
 ## How does it work?
 
@@ -21,29 +27,249 @@ There are two main stages to the process - enrolment and verification.
 
 ### Enrolment
 
-Before a user may authenticate with the system by using their voice they must enrol. Enrolment is performed from a PC in any environnement (i.e without personal protective equipment - like an office).
+Before a user may use their voice to log-in to the bot, they must enrol. The idea is that once they have enrolled they may then use any of the field stations to log in using their voice in the future. 
 
-Enrolment involves logging in to [Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/active-directory-whatis) and saving the details of the login (refresh token, user claims) for later.  It does not save any further access tokens or otherwise that could be used to access downstream services such as the Microsoft Graph. 
+This process starts by logging the user in to Azure Active Directory and getting their access tokens and refresh tokens and saving them to a cache for later. Next the user will be asked to enrol their voice for identification. This involves selecting a phrase from a pre-determined list and repeating that phrase three times. 
 
-Once the user has been logged in to AAD they are asked to enrol for voice identification. This process involves selecting a pre-generated phrase and repeating it a number of times.
+Once the speaker enrolment is complete, the details are saved in a database and the user may now log in to the protected web page using their voice. 
 
-Once successful the user is presented with a unique PIN which can be later used to help identify them. 
+The user is provided with a unique PIN which they will need to use later as part of the login process. 
 
-Enrolment can be done up to 90 days (by default) before the user would like to log in.  
+In the scenario of a refinery here, the user would enrol in an office environment using a laptop with a microphone. 
 
 ### Verification
 
-This system may be suited to a range of scenarios but in this case the example is a bot that is being used in an environment where the user cannot type or be identified using their face. The user must authenticate and commuicate with the bot using only their voice. In this example, the bot must be used in an authenticated state, it cannot be used by a single account that everyone uses. 
+The user has enrolled at some time in the past and would now like to use the protected web site (in this case a bot) without using their hands. The user approaches a bot field station (which is a PC with a good quality microphone). The field station is sitting on the bot idle page - waiting for them to initiate a log in. 
 
-During the verification stage, the user approaches the "field station" and kicks off the login process (perhaps by pressing space bar - something that they can do whilst wearing protective equipment in this example). 
+The user kicks off the login by pressing any key - such as space bar which is easy enough to do even when wearing gloves. 
 
-Upon activation the user is redirected from the client site to the authentication site (where they earlier enrolled) via OpenId Connect OAuth 2 flows.  Instead of being asked to enroll the user is asked to say their PIN (that was provided during enrolment) aloud. 
+The ASP.NET site that is hosting the bot webpage will detect that it is not authenticated and cause a login redirection flow via OpenId Connect. This flow will take the user to the same Sesame site and ask them to enter their PIN using their voice. 
 
-If the PIN is accepted then the user will be presented with the phrase they enrolled their voice with and asked the repeat it. If this is successful, the user will be redirected back to the original site and will be authenticated.  
+The user reads aloud their PIN and the login system goes and searches the database for that user. The PIN is used in this scenario like a User Id - a unique identifier to find the user in the system and present them with their voice login prompt. 
+
+The user will next be asked to say aloud their voice authentication phrase. 
+
+Once voice login is successful, the system will grab the Azure Active Directory token from the distributed cache and check it for validity (including performing a refresh if needed) to ensure the user is still a valid user in the AAD system. 
+
+Upon validation, the OpenID Connect system will redirect back to the protected (bot) site and complete the login flow. 
+
+The user may now use the bot using their voice until a timeout or manual logout occurs. Once the user is finished, the bot will log them out and return to the idle page awaiting the next login
+
+### OpenId Connect
+
+[OpenID Connect](http://openid.net/connect/) is an extension of [OAuth2](https://oauth.net/2/). It allows a site to delegate authentication to another site without compromising security. This solution uses OpenId connect as it is well supported and easy to integrate to a web site without heavy modification. 
+
+### OpenIddict
+
+OAuth 2 and OpenId Connect a simple to use, but difficult to implement. Luckily a lot of the heavily lifting has been done in projects such as [Identity Server](https://github.com/identityserver) and [OpenIddict](https://github.com/openiddict) which is based on ASOS ([AspNet.Security.OpenIdConnect.Server](https://github.com/aspnet-contrib/AspNet.Security.OpenIdConnect.Server)).
 
 
-
-### A note about security
+# A note about security
 
 This mode of authentication is weaker than regular 2FA. It is suggested that you limit the capabilities of the client app appropriately. 
+
+  
+
+## Getting Started
+
+This documentation will show the process from Visual Studio Code. 
+
+### Required Software
+
+Before you begin you'll need the following software installed:
+
+- Visual Studio or Visual Studio Code [https://www.visualstudio.com/](https://www.visualstudio.com/)
+- [ASP.NET Core 2](https://www.microsoft.com/net)
+- [Postman](https://www.getpostman.com/)
+- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+- [SQL Server Express LocalDB](https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-2016-express-localdb)
+
+### Clone the repo
+
+Start by cloning the [repo](https://github.com/CSEANZ/Sesame) ([Visual Studio Code](https://code.visualstudio.com/docs/editor/versioncontrol), [command line](https://help.github.com/articles/cloning-a-repository/)). 
+
+Navigate to the parent directory that you want to clone in to a sub-folder of and type:
+
+```
+git clone https://github.com/CSEANZ/Sesame.git
+```
+
+### Make sure it builds
+
+#### ASP.NET Core
+
+ASP.NET Core 2 is the latest version of the open source, cross platform version of ASP.NET. It's fast and powerful and has a great programming architecture based around dependency injection and configuration. 
+
+You'll need at least version 2 of `.NET Core` installed to run it. You can check your version by running the following command:
+
+```
+dotnet --version
+```
+
+At the time of writing the latest version was `2.1.2`. 
+
+.NET Core can be easily edited and built from the command line, Visual Studo Code or Visual Studio 2017.
+
+From the cloned directory locate the "Server" folder and open it in Visual Studio Code (File->Open Folder). 
+
+Code may show you a bunch of messages at the top of the screen. It might ask you to Add Missing Assets - allow this. It may also ask you to restore, you can do that to - although we're going to do that manually next. 
+
+#### Building .NET Core 
+
+.NET Core needs to have it's packages restored before you can build (ala Node.JS). 
+
+Open a new [terminal window](https://code.visualstudio.com/docs/editor/integrated-terminal) in code. And type the following:
+
+```
+dotnet restore
+```
+
+You will see a bunch of output showing what was restored. 
+
+```
+C:\Users\jak\Documents\GitHub\Sesame\Server>dotnet restore
+  Restoring packages for C:\Users\jak\Documents\GitHub\Sesame\Server\Sesame.Web\Sesame.Web.csproj...
+  ...
+  Restore completed in 946.34 ms for C:\Users\jak\Documents\GitHub\Sesame\Server\Sesame.Web\Sesame.Web.csproj.
+  ```
+
+You may now build the site. 
+
+```
+dotnet build
+```
+
+#### Trust the SSL Certificate
+
+During development the server will need to use SSL as [Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/active-directory-whatis) will not operate otherwise. When running in Visual Studio it will handle this for you - the SSL certificate will be installed and trusted automatically (with a prompt asking first).
+
+When running from Visual Studio Code or a terminal window things get a little more complex as a certificate has to be configured in code. 
+
+The certificate is referenced in `Program.cs`
+
+```csharp
+listenOptions.UseHttps("devcert.pfx", "dev");
+```
+
+This certificate needs to be trusted. 
+
+The certificate in the root of the project folder (Sesame\Sesame.Web ). This cert will need to be installed in Local Computer\Trusted Root Certification Authority folder (password is south32). Double click the certificate and follow the prompts to install it (on Windows). The process for creating a certificate and trusting on mac can be found [here](https://www.humankode.com/asp-net-core/develop-locally-with-https-self-signed-certificates-and-asp-net-core).
+
+#### Running the project
+
+There are a few ways to run the app. in the `Sesame.Web` folder you can type `dotnet run` and it will boot the app. 
+
+You can also run the site in Visual Studio (code and 2017) by pressing F5. See [this tutorial](https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app-xplat/start-mvc) for building ASP.NET Core sites in Visual Studio Code. 
+
+**Note:** If you're getting an Access Denied error on the line that loads teh certificate in Visual Studio 2017 then run Visual Studio as administrator. 
+
+A nice way to run a .NET Core app is to use `dotnet watch run`. This will continuously rebuild and start the app as you go much like `nodemon` in Node.js world. 
+
+#### Databases
+
+The Sesame site uses a number of different databases for perform various caching and storage roles. 
+
+- [Distributed](https://docs.microsoft.com/en-us/aspnet/core/performance/caching/distributed) session cache database - ASP.NET Core needs to be able to save session state to a distributed cache, so when the app scales across server instances, the cache is available. 
+- [Distributed](https://docs.microsoft.com/en-us/aspnet/core/performance/caching/distributed) token cache database - similar to the session cache, the token cache needs to be accessible across servers.
+- [OpenIddict](https://github.com/openiddict) database - OpenIddict will use a database to store things like available applications (client id, client secret etc) as well as token grant codes amongst other things.
+- User database - a database specific to Sesame that stores pairings between AAD users and voice ID users, including tokens, pins and other required information.
+
+#### User Secrets   
+It's best not to store any secret connection strings in source control - especailly when it's open source! To get around this, .NET Core supports a feature called [Secret Manager](https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?tabs=visual-studio). 
+
+User secrets are enabled by editing the .csproj file and adding `<DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0" />` to an `ItemGroup` tag (fin teh other tools and add it with them). 
+
+Also add `<UserSecretsId>User-Secret-ID</UserSecretsId>` to the `<PropertyGroup>` near the top of the file. You can change the secrets id to be anything else - like Sesame. 
+
+You'll also need to tell the configuration to use your secrets in `Startup.cs`. 
+
+``` csharp
+public Startup(IHostingEnvironment env)
+{
+    var builder = new ConfigurationBuilder();
+
+    if (env.IsDevelopment())
+    {
+        builder.AddUserSecrets<Startup>();
+    }
+
+    Configuration = builder.Build();
+}
+```
+
+##### Editing User Secrets
+
+You can edit secrets by locating the `secrets.json` file. In Visual Studio, right click the project and select "Manage User Secrets". Alternatively in explorer (etc) locate the `secrets.json` file here: 
+
+`Windows: %APPDATA%\microsoft\UserSecrets<userSecretsId>\secrets.json`
+
+`Linux: ~/.microsoft/usersecrets/<userSecretsId>/secrets.json`
+
+`Mac: ~/.microsoft/usersecrets/<userSecretsId>/secrets.json`
+
+
+Add the following to the file:
+
+```json
+{
+    "ConnectionStrings": {
+        "OidcCache": "Server=(localdb)\\mssqllocaldb;Database=OIDC;Trusted_Connection=True;MultipleActiveResultSets=true;",
+        "TokenCache": "Server=(localdb)\\mssqllocaldb;Database=SesameCache;Trusted_Connection=True;MultipleActiveResultSets=true;",
+        "SessionState": "Server=(localdb)\\mssqllocaldb;Database=SesameSessionState;Trusted_Connection=True;MultipleActiveResultSets=true;",
+        "UserMaps": "Server=(localdb)\\mssqllocaldb;Database=SesameUserMaps;Trusted_Connection=True;MultipleActiveResultSets=true;"
+    },
+    "SpeakerRecognitionKey": "7507f2b53b5c48888ab869704141ba2b"
+}
+```
+
+![User Secrets](https://user-images.githubusercontent.com/5225782/34583887-928858a0-f1ed-11e7-92e1-99300cbfc1b9.gif)
+
+
+#### Database init
+
+The two cache databases need to be initalised, but the OpenIddict and User database do not as they use [Entity Framework](https://docs.microsoft.com/en-us/ef/core/get-started/aspnetcore/new-db) to do the heavy lifting for us. 
+
+To setup the production cache, create two new databases called `SesameCache` and `SesameSessionState` in (localdb)\mssqllocaldb. To do this you can use [SQL Server Management Studio](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms) of you can use the SQL Server Object Explorer in Visual Studio 2017. 
+
+Next navigate to `Sesame\Sesame.Web` in a terminal window and run:
+
+```dotnet sql-cache create "Server=(localdb)\mssqllocaldb;Database=SesameSessionState;Trusted_Connection=True;MultipleActiveResultSets=true;" dbo Cache```
+
+and
+
+```dotnet sql-cache create "Server=(localdb)\mssqllocaldb;Database=SesameCache;Trusted_Connection=True;MultipleActiveResultSets=true;" dbo Cache```.
+
+This will create the required tables in the local db for caching using ASP.NET. 
+
+## Enrolment
+
+Enrolment is completed by saying a phrase, chosen from a [list of phrases](https://azure.microsoft.com/en-au/services/cognitive-services/speaker-recognition/), three times.
+
+To record each utterance of the chosen phrase and format to the [requirements of the Speaker Recognition API](https://westus.dev.cognitive.microsoft.com/docs/services/563309b6778daf02acc0a508/operations/5645c3271984551c84ec6797), [cwilso/AudioRecorder](https://github.com/cwilso/AudioRecorder) is used. Try the [demo](https://webaudiodemos.appspot.com/AudioRecorder/index.html) and read about the [Web Audio API](https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html).
+
+1. First, the list of phrases are [displayed for selection](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/wwwroot/js/speaker-verification.js#L66)
+2. Then, a [Verification Profile](https://westus.dev.cognitive.microsoft.com/docs/services/563309b6778daf02acc0a508/operations/563309b7778daf06340c9652) is [created](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/wwwroot/js/speaker-verification.js#L93)
+3. A recording of [each utterance](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/wwwroot/js/speaker-verification.js#L16) is made
+4. Which are [added to the Verification Profile](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/wwwroot/js/speaker-verification.js#L153)
+5. Finally, after [three successful recordings](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/wwwroot/js/speaker-verification.js#L121), the User is prompted to [enter a pin](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/wwwroot/js/speaker-verification.js#L26) as a second factor
+
+### Authenticate Users with Azure Active Directory
+The Sesame.Web project was configured to obtain identities from Azure Active Directory using Visual Studio 2017.
+
+![Work or School Accounts](https://user-images.githubusercontent.com/5225782/34583855-6c0b77ca-f1ed-11e7-8c8f-e59f06391d8b.PNG "Work or School Accounts")
+
+#### Distributed Token Cache
+When creating a .NET Core 2.0 Web API or Web Application using Visual Studio 2017, the [Microsoft.NETCore.App](https://www.nuget.org/packages/Microsoft.NETCore.App) [metapackage](https://docs.microsoft.com/en-us/dotnet/core/packages#metapackages) is included as a dependency, which contains the [Azure Active Directory Authentication Library](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-authentication-libraries) (ADAL). ADAL makes authentication easier for developers with features including:
+
+- A configurable token cache that stores access tokens and refresh tokens, and
+- Automatic token refresh when an access token expires and a refresh token is available in the cache
+
+To authenticate with Azure Active Directory and obtain access tokens and refresh tokens, an [AuthenticationContext](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/Extensions/OpenIdAuthenticationOptionsExtensions.cs#L38) is created. An `AuthenticationContext` can optionally use a `TokenCache` to store tokens. When an `AuthenticationContext` is used to acquire a token (e.g. with [AcquireTokenAsync](https://docs.microsoft.com/en-us/dotnet/api/microsoft.identitymodel.clients.activedirectory.authenticationcontext.acquiretokenasync?view=azure-dotnet)), the cache is used to lookup cached tokens.
+
+By default, a `TokenCache` [uses an IDictionary](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/blob/0dec7a635ac3b4793b2e7b6396d5b06501b46368/src/Microsoft.IdentityModel.Clients.ActiveDirectory/TokenCache.cs#L56) which won't scale to two or more servers, and so [AdalDistributedTokenCache](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/Services/AdalDistributedTokenCache.cs) was created, which extends `TokenCache`, and takes an implementation of an [IDistributedCache](https://github.com/aspnet/Caching/tree/dev/src) instead.
+
+### Startup.cs
+
+During [Startup](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/Startup.cs#L67), Sesame is configured with a cache that persists token to disk in JSON format, used for unit testing or a cache that persists to SQL Server, either on-premises or in the cloud, used for integration testing and production.
+
 
