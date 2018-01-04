@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <Folder Include="Content\" />
+    <Folder Include="Helpers\Facade\" />
   </ItemGroup>
 
   <ItemGroup>

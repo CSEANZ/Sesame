@@ -24,7 +24,7 @@ using Sesame.Web.Helpers;
 using Microsoft.AspNetCore.Http;
 using Sesame.Web.Contracts;
 using Sesame.Web.DatabaseContexts;
-using Standard.Microsoft.CognitiveServices.SpeakerRecognition;
+using Universal.Microsoft.CognitiveServices.SpeakerRecognition;
 
 namespace Sesame.Web
 {
@@ -60,9 +60,9 @@ namespace Sesame.Web
 
             services.AddTransient<ITokenHelper, TokenHelper>();
 
-            services.AddSingleton<IPersistentStorageService, PersistentStorageService>();
+            services.AddTransient<IPersistentStorageService, PersistentStorageService>();
 
-            services.AddSingleton(new SpeakerRecognitionClient(Configuration["SpeakerRecognitionKey"]));
+            services.AddSingleton<SpeakerRecognitionClient>(new SpeakerRecognitionClient(Configuration["SpeakerRecognitionKey"]));
 
             if (HostingEnvironment.IsDevelopment())
             {

@@ -6,20 +6,20 @@
 
 <main role="main">
 
-    
+
     <div class="jumbotron">
         <h1>Authorization</h1>
 
-        <p class="lead text-left">Do you want to grant <strong>@Model.ApplicationName</strong> access to your data? (scopes requested: @Model.Scope)</p>
-
+        @*<p class="lead text-left">Do you want to grant <strong>@Model.ApplicationName</strong> access to your data? (scopes requested: @Model.Scope)</p>
+        *@
         <form method="post" id="authenticationform">
             @Html.AntiForgeryToken()
 
             <input type="hidden" name="redirect_uri" value="@Model.RedirectUri" />
             <input type="hidden" name="request_id" value="@Model.RequestId" />
 
-            <input   class="btn btn-lg btn-success" name="submit.Accept" type="submit" value="Yes" />
-            @*<input class="btn btn-lg btn-danger" name="submit.Deny" type="submit" value="No" />*@
+            <input class="btn btn-lg btn-success hidden" name="submit.Accept" type="submit" value="Yes" />
+            @*<input class="btn btn-lg btn-danger hidden" name="submit.Deny" type="submit" value="No" />*@
         </form>
     </div>
 
@@ -28,6 +28,7 @@
         <div class="row" align="center">
             <div class="col-sm-12">
                 <p> Welcome</p>
+                <p>Press space to begin</p>
             </div>
         </div>
     </div>
