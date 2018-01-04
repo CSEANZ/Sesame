@@ -88,13 +88,20 @@ namespace Sesame.Web.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [FormValueRequired("submit.Accept")]
+       
         [HttpPost("~/connect/authorize"), ValidateAntiForgeryToken]
         public async Task<IActionResult> Accept(OpenIdConnectRequest request)
         {
             if (!_sessionStateService.Get<bool>("VoiceAuthenticated"))
             {
-               //return Forbid(OpenIdConnectServerDefaults.AuthenticationScheme);
+               return Forbid(OpenIdConnectServerDefaults.AuthenticationScheme);
+            }
+
+            var userNameId = _sessionStateService.Get<string>("UserPrincipalName");
+
+            if (userNameId == null)
+            {
+                return Forbid(OpenIdConnectServerDefaults.AuthenticationScheme);
             }
 
             var identity = new ClaimsIdentity(
@@ -105,9 +112,9 @@ namespace Sesame.Web.Controllers
             // Add a "sub" claim containing the user identifier, and attach
             // the "access_token" destination to allow OpenIddict to store it
             //// in the access token, so it can be retrieved from your controllers.
-            identity.AddClaim(OpenIdConnectConstants.Claims.Subject, "SampleSubject",
+            identity.AddClaim(OpenIdConnectConstants.Claims.Subject, userNameId,
                 OpenIdConnectConstants.Destinations.AccessToken);
-            identity.AddClaim(OpenIdConnectConstants.Claims.Name, "SampleName",
+            identity.AddClaim(OpenIdConnectConstants.Claims.Name, userNameId,
                 OpenIdConnectConstants.Destinations.AccessToken);
 
             identity.AddClaim("YourOwnClaim", "Your own claim value",
@@ -208,7 +215,7 @@ namespace Sesame.Web.Controllers
 
                 // Create a new authentication ticket, but reuse the properties stored
                 // in the authorization code, including the scopes originally granted.
-                var ticket = await CreateTicketAsync(request, info.Properties);
+                var ticket = await CreateTicketAsync(request, info);
 
                 return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
             }
@@ -222,16 +229,25 @@ namespace Sesame.Web.Controllers
 
         //TODO: this is an example 
         private async Task<AuthenticationTicket> CreateTicketAsync(
-            OpenIdConnectRequest request, 
-            AuthenticationProperties properties = null)
+            OpenIdConnectRequest request,
+            AuthenticateResult authResult = null)
         {
+            AuthenticationProperties properties = authResult.Properties;
+
+            var userId = authResult.Principal.Claims.FirstOrDefault(_ => _.Type == OpenIdConnectConstants.Claims.Subject)?.Value;
+
+            if (userId == null)
+            {
+                return null;
+            }
+
            // string userPrincipalName = _sessionStateService.Get<string>("UserPrincipalName");
             SimpleClaim simpleClaim = new SimpleClaim()
             {
-                ObjectIdentifier = "JordoOID",
-                UserPrincipalName = "JordoUPN",
-                GivenName = "JordanGiven",
-                Surname = "JordanSurname"
+                ObjectIdentifier = userId,
+                UserPrincipalName = "SomeUPN",
+                GivenName = "Joe",
+                Surname = "Citizen"
             };
 
             // Create a new ClaimsPrincipal containing the claims that

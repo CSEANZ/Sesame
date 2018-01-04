@@ -76,7 +76,7 @@ namespace Sesame.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> GetOrCreateVerificationProfileAsync()
         {
-            string userPrincipalName = User.Claims.Where(x => x.Type == ClaimTypes.Upn).FirstOrDefault().Value;
+            var userPrincipalName = _getUserUniqueId();
 
             string result = null;
 
@@ -103,7 +103,7 @@ namespace Sesame.Web.Controllers
         [Route("profile")]
         public async Task<IActionResult> GetProfile()
         {
-            string userPrincipalName = User.Claims.Where(x => x.Type == ClaimTypes.Upn).FirstOrDefault().Value;
+            string userPrincipalName = _getUserUniqueId();
 
             try
             {
@@ -145,7 +145,7 @@ namespace Sesame.Web.Controllers
         [Route("assign")]
         public async Task<IActionResult> AssignSpeakerPinAsync()
         {
-            string userPrincipalName = User.Claims.Where(x => x.Type == ClaimTypes.Upn).FirstOrDefault().Value;
+            string userPrincipalName = _getUserUniqueId();
 
             try
             {
@@ -171,7 +171,7 @@ namespace Sesame.Web.Controllers
         [Route("{verificationProfileId}/enroll")]
         public async Task<IActionResult> CreateEnrollmentAsync(string verificationProfileId)
         {
-            string userPrincipalName = User.Claims.Where(x => x.Type == ClaimTypes.Upn).FirstOrDefault().Value;
+            string userPrincipalName = _getUserUniqueId();
 
             using (var memoryStream = new MemoryStream())
             {
@@ -216,7 +216,7 @@ namespace Sesame.Web.Controllers
         [Route("phrase")]
         public async Task<IActionResult> GetVerificationPhrase([FromBody]dynamic bodyObject)
         {
-            string userPrincipalName = User.Claims.Where(x => x.Type == ClaimTypes.Upn).FirstOrDefault().Value;
+            string userPrincipalName = _getUserUniqueId();
             string verificationPhrase = bodyObject.verificationPhrase;
 
             try
@@ -301,6 +301,13 @@ namespace Sesame.Web.Controllers
                     return StatusCode((int)e.StatusCode, e.Message);
                 }
             }
+        }
+
+        string _getUserUniqueId()
+        {
+            var userPrincipalName = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            return userPrincipalName;
         }
     }
 }
