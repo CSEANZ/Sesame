@@ -70,7 +70,7 @@ This mode of authentication is weaker than regular 2FA. It is suggested that you
 
   
 
-## Getting Started
+# Getting Started
 
 This documentation will show the process from Visual Studio Code. 
 
@@ -153,15 +153,19 @@ listenOptions.UseHttps("devcert.pfx", "dev");
 
 This certificate needs to be trusted. 
 
-The certificate in the root of the project folder (Sesame\Sesame.Web ). This cert will need to be installed in Local Computer\Trusted Root Certification Authority folder (password is south32). Double click the certificate and follow the prompts to install it (on Windows). The process for creating a certificate and trusting on mac can be found [here](https://www.humankode.com/asp-net-core/develop-locally-with-https-self-signed-certificates-and-asp-net-core).
+The certificate in the root of the project folder (Sesame\Sesame.Web ). This cert will need to be installed in Local Computer\Trusted Root Certification Authority folder (password is south32). Double click the certificate and follow the prompts to install it (on Windows). 
+
+The process for creating a certificate and trusting on Mac can be found [here](https://www.humankode.com/asp-net-core/develop-locally-with-https-self-signed-certificates-and-asp-net-core).
 
 #### Running the project
 
 There are a few ways to run the app. in the `Sesame.Web` folder you can type `dotnet run` and it will boot the app. 
 
-You can also run the site in Visual Studio (code and 2017) by pressing F5. See [this tutorial](https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app-xplat/start-mvc) for building ASP.NET Core sites in Visual Studio Code. 
+You can also run the site in Visual Studio (code and 2017) by pressing F5. 
 
-**Note:** If you're getting an Access Denied error on the line that loads teh certificate in Visual Studio 2017 then run Visual Studio as administrator. 
+See [this tutorial](https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app-xplat/start-mvc) for building ASP.NET Core sites in Visual Studio Code. 
+
+**Note:** If you're getting an Access Denied error on the line that loads the certificate in Visual Studio 2017 then run Visual Studio as administrator. 
 
 A nice way to run a .NET Core app is to use `dotnet watch run`. This will continuously rebuild and start the app as you go much like `nodemon` in Node.js world. 
 
@@ -272,4 +276,152 @@ By default, a `TokenCache` [uses an IDictionary](https://github.com/AzureAD/azur
 
 During [Startup](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/Startup.cs#L67), Sesame is configured with a cache that persists token to disk in JSON format, used for unit testing or a cache that persists to SQL Server, either on-premises or in the cloud, used for integration testing and production.
 
+### Database store  (saving user / voice print id pairings etc)
 
+The application uses an [Entity Framework](https://docs.microsoft.com/en-us/ef/core/get-started/aspnetcore/new-db) code first database. This database is initialised in [OpenIddictDatabaseHelpers.cs](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/Helpers/OpenIddictDatabaseHelpers.cs#L24) which is called during initialisation from `Startup.cs`. 
+
+Operations on this database are perfomed by taking a dependency on the `[PersistentStorageService](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/Services/PersistentStorageService.cs)` via the [`IPersistentStorageService`](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/Services/IPersistentStorageService.cs). 
+
+To take the dependency `IPersistentStorageService` is injected to the constructor in [`VerificationProfilesController`](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/Controllers/VerificationProfilesController.cs). 
+
+```csharp
+public VerificationProfilesController(IConfiguration configuration, 
+    ISessionStateService sessionStateService,
+    SpeakerRecognitionClient mSpeakerRecognitionClient,
+    IPersistentStorageService persistantStorageService)
+```
+
+Database operations can now be performed on the injected instance. 
+
+```csharp
+verificationProfileId = await _persistantStorageService.GetSpeakerVerificationProfileByPinAsync(pin);
+```
+
+The `IPersistentStorageService` is configured for depency injection in [`Startup.cs`](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/Startup.cs#L61).
+
+```csharp
+services.AddSingleton<IPersistentStorageService, PersistentStorageService>();
+```
+
+### OpenID Connect
+
+OpenId Connect is used to orchestrate the authentication process as it's standards based and well supported on a range of platforms. [Samples](https://github.com/CSEANZ/Sesame/tree/master/Samples) are provided for ASP.NET Core and ASP.NET MVC 4. 
+
+#### Create a new app
+
+Before an app (like a website) can log in using your OpenId Connect server (Sesame) an app must be created. When you first run Sesame, a couple of client apps are created automatically by [`OpenIddictDatabaseHelpers`](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/Helpers/OpenIddictDatabaseHelpers.cs#L37). 
+
+These database entries can be explored in the `OIDC` database under the `OpenIddictApplications` table. 
+
+![sql object explorer](https://user-images.githubusercontent.com/5225782/34025806-1aff216c-e1a6-11e7-8efc-ceab673f3416.PNG)
+
+You can add and remove application settings here. 
+
+#### Authentication Flow Types
+
+There are a number of different authentication flows that are possible using OAuth (which OpenId Connect uses). The two flows supported by Sesame are "Authorization Code" and "Implicit". 
+
+##### Authorization Code Flow
+This flow type is the most secure and support in ASP.NET Core sites amongst other things. During this flow two the client browser never has the possibility to see the token, thus the token is always kept safe. 
+
+##### Implicit Flow
+In this flow type an id_token is returned to the client and it may be intercepted / traded for an authentication token by the client. This flow type can be dangerous if you do not trust the client with powerful tokens. In Sesame, the tokens are only used by the calling site, so there is no danger if the tokens are intercepted by the caller. 
+
+#### Configuring the OpenId Connect Server
+
+The server flow is configured in [`OpenIddictServerExtensions`](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/Extensions/OpenIddictServerExtensions.cs) which is called from `Startup.cs`. 
+
+Of interest are the lines:
+
+```csharp
+options.AllowAuthorizationCodeFlow();
+options.AllowImplicitFlow();
+```
+
+Also of interest are the following lines which configure the token grand end points that the calling apps will navigate to. 
+
+```csharp
+options.EnableAuthorizationEndpoint("/connect/authorize")
+    .EnableLogoutEndpoint("/connect/logout")
+    .EnableTokenEndpoint("/connect/token")
+    .EnableUserinfoEndpoint("/api/userinfo");
+```
+
+You'll find these controllers are configured in [AuthorizationController](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/Controllers/AuthorizationController.cs#L57). 
+
+```csharp
+[HttpGet("~/connect/authorize")]
+public async Task<IActionResult> Authorize(OpenIdConnectRequest request)
+{
+```
+
+There are two or three calls to this server depending on the type of authorisation flow that is requested by the client app. 
+
+- Authorize - the page that is shown to the user who is loogging in (where they will be asked for verify their voice print id).
+- Accept - the controller that is called when the user is to be granted login.
+- Exchange - the controller that is called when the calling app exchanges the code or id_token for an authentication token. 
+
+These flow types are demonstrated in the samples with the [ASP.NET Core sample](https://github.com/CSEANZ/Sesame/tree/master/Samples/Core) using Authorization Code Flow and the [MVC4](https://github.com/CSEANZ/Sesame/tree/master/Samples/Owin) site using Implicit Flow. 
+
+#### JWT
+
+Sesame is configured to use JWT out of the box. This can be disabled by removing the following lines from `OpenIddictServerExtensions`. 
+
+```csharp
+options.UseJsonWebTokens();
+options.AddEphemeralSigningKey();
+```
+
+### Voice print Id (how to record the voice print id etc)
+SVB
+### Token refresh (why, how, distro cache etc)
+SVB
+## Samples (links to sample sites, brief look at how they hook in to Sesame)
+
+There are two samples provided:
+- [ASP.NET Core 2](https://github.com/CSEANZ/Sesame/tree/master/Samples/Core)
+- [MVC5](https://github.com/CSEANZ/Sesame/tree/master/Samples/Owin)
+
+Both samples are generated with template code from Visual Studio 2017 with Azure Active Directory login enabled by the template. They are then modified to use Sesame as their login server instead. 
+
+### Add to any site using OIDC
+
+The ASP.NET Core site is configured in two locations:
+
+#### [Startup.cs](https://github.com/CSEANZ/Sesame/blob/master/Samples/Core/CoreSample/Startup.cs)
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddAuthentication(sharedOptions =>
+    {
+        sharedOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+    })
+    .AddAzureAd(options => Configuration.Bind("AzureAd", options))
+    .AddCookie();
+
+    services.AddMvc();
+}
+```
+
+#### [AzureAdAuthenticationBuilderExtensions](https://github.com/CSEANZ/Sesame/blob/master/Samples/Core/CoreSample/Extensions/AzureAdAuthenticationBuilderExtensions.cs)
+
+```csharp
+public void Configure(string name, OpenIdConnectOptions options)
+{
+    options.ClientId = "mvc";
+    options.Authority = "https://localhost:44398/";
+    options.UseTokenLifetime = false;
+    
+    options.AuthenticationMethod = OpenIdConnectRedirectBehavior.RedirectGet;
+    options.ResponseType = "code";
+    options.ClientSecret =
+        "901564A5-E7FE-42CB-B10D-61EF6A8F3654";
+    options.CallbackPath = "/signin-oidc";
+    options.RequireHttpsMetadata = false;
+    options.SaveTokens = true;
+}
+```
+
+These options could be added to any ASP.NET Core site to add this style of OpenId Connect based voice authentication.
