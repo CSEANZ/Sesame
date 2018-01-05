@@ -15,10 +15,10 @@ namespace Sesame.Web.Tests
         [TestMethod]
         public async Task Validate_ValidKey_ExpectAuthenticationResult()
         {
-            string authority = "https://login.microsoftonline.com/***REMOVED***/";
-            string clientId = "***REMOVED***";
+            string authority = "https://login.microsoftonline.com/<Your tenant id>/";
+            string clientId = "<your client id>";
             string resource = "https://graph.microsoft.com/";
-            string userId = "4832e139-8e1d-4083-b0ef-e9888411c42f";
+            string userId = "<your user id>";
 
             IDistributedCache distributedCache = new FileCache();
 
