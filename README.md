@@ -7,6 +7,8 @@ This project allows you to add voice identification to any site compatible with 
 
 The core tenet of the approach taken in this solution is to ensure it doesn't tightly bind our solution to the client site's source code. The end result is an [OAuth2](https://oauth.net/2/)/[OpenID Connect](http://openid.net/connect/) compatible authentication web site that can be used to authenticate using voice from any website that supports an OpenID Connect based authentication flow. 
 
+The project was developed as part of a collaboration by [South32](https://www.south32.net/) and Microsoft engineers.  
+
 ## Key Technologies
 
 - [Speaker Recognition API](https://azure.microsoft.com/en-au/services/cognitive-services/speaker-recognition/)
@@ -41,7 +43,7 @@ In the scenario of a refinery here, the user would enrol in an office environmen
 
 The user has enrolled at some time in the past and would now like to use the protected web site (in this case a bot) without using their hands. The user approaches a bot field station (which is a PC with a good quality microphone). The field station is sitting on the bot idle page - waiting for them to initiate a log in. 
 
-The user kicks off the login by pressing any key - such as space bar which is easy enough to do even when wearing gloves. 
+For privacy purposes the system avoids having the browser microphone on  unless the user indicates they are ready to log in. The listening process will start only by user interaction. The user kicks off the login by pressing any key - such as space bar which is easy enough to do even when wearing gloves. 
 
 The ASP.NET site that is hosting the bot webpage will detect that it is not authenticated and cause a login redirection flow via OpenId Connect. This flow will take the user to the same Sesame site and ask them to enter their PIN using their voice. 
 
