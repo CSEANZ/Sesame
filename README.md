@@ -324,7 +324,7 @@ You can add and remove application settings here.
 There are a number of different authentication flows that are possible using OAuth (which OpenId Connect uses). The two flows supported by Sesame are "Authorization Code" and "Implicit". 
 
 ##### Authorization Code Flow
-This flow type is the most secure and support in ASP.NET Core sites amongst other things. During this flow two the client browser never has the possibility to see the token, thus the token is always kept safe. 
+This flow type is the most secure and support in ASP.NET Core sites amongst other things. During this flow the client browser never has the possibility to see the token, thus the token is always kept safe. 
 
 ##### Implicit Flow
 In this flow type an id_token is returned to the client and it may be intercepted / traded for an authentication token by the client. This flow type can be dangerous if you do not trust the client with powerful tokens. In Sesame, the tokens are only used by the calling site, so there is no danger if the tokens are intercepted by the caller. 
@@ -382,7 +382,7 @@ Both samples are generated with template code from Visual Studio 2017 with Azure
 
 ### Add to any site using OIDC
 
-The ASP.NET Core site is configured in two locations:
+Configuring a client website to use Sesame is simple. The client ASP.NET Core site must be configured in two locations:
 
 #### [Startup.cs](https://github.com/CSEANZ/Sesame/blob/master/Samples/Core/CoreSample/Startup.cs)
 
@@ -423,6 +423,6 @@ public void Configure(string name, OpenIdConnectOptions options)
 }
 ```
 
-These options could be added to any ASP.NET Core site to add this style of OpenId Connect based voice authentication.
+These options enable any ASP.NET Core site to use OpenId Connect based voice authentication.
 
 Configure these options in `appsettings.json`.
