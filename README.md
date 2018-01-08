@@ -415,22 +415,22 @@ public void ConfigureServices(IServiceCollection services)
         sharedOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
     })
-    .AddAzureAd(options => Configuration.Bind("AzureAd", options))
+    .AddSesame(options => Configuration.Bind("Sesame", options))
     .AddCookie();
 
     services.AddMvc();
 }
 ```
 
-#### [AzureAdAuthenticationBuilderExtensions](https://github.com/CSEANZ/Sesame/blob/master/Samples/Core/CoreSample/Extensions/AzureAdAuthenticationBuilderExtensions.cs)
+#### [SesameAuthenticationBuilderExtensions](https://github.com/CSEANZ/Sesame/blob/master/Samples/Core/CoreSample/Extensions/SesameAuthenticationBuilderExtensions.cs)
 
 ```csharp
 public void Configure(string name, OpenIdConnectOptions options)
 {
-    options.ClientId = _azureOptions.ClientId;
-    options.Authority = _azureOptions.Authority;
-    options.ClientSecret = _azureOptions.ClientSecret;
-    options.CallbackPath = _azureOptions.CallbackPath;
+    options.ClientId = _sesameOptions.ClientId;
+    options.Authority = _sesameOptions.Authority;
+    options.ClientSecret = _sesameOptions.ClientSecret;
+    options.CallbackPath = _sesameOptions.CallbackPath;
     
     options.UseTokenLifetime = false;
     
