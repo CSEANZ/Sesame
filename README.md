@@ -264,6 +264,27 @@ The Sesame.Web project was configured to obtain identities from Azure Active Dir
 
 ![Work or School Accounts](https://user-images.githubusercontent.com/5225782/34583855-6c0b77ca-f1ed-11e7-8c8f-e59f06391d8b.PNG "Work or School Accounts")
 
+#### Configure Sesame to use your Azure Active Directory
+
+Log into the [Azure Portal](https://portal.azure.com) and search for *Active Directory*. 
+
+* From the sidebar, select *App Registrations*
+* Create a `New Application Registration`
+* Name your app and select *Web App / API*
+* Set the login url to `http://localhost:52945/signin-oidc` (or equivalent) and **save**
+* Under YOUR_NEW_APP > *Settings* > *Required Permissions*, make sure Sign in and Read User Profile is enabled. 
+* Click *Grant Permissions*.
+
+![Screenshot of Azure Portal AD App Registrations](Media/AzureAdAppRegistrationScreenshot.png) 
+
+
+Back in the Sesame code, open `appsettings.json` and set the following values under *OpenIdConnect* from the Azure Portal.
+
+* ClientId -> your Application ID from Azure Portal
+* ClientSecret -> Create a secret in *Settings* > *Keys* named `ClientSecret`
+* \<your tenant id> -> Guid found in *App Registrations* > *Endpoints* blade.
+
+
 #### Distributed Token Cache
 When creating a .NET Core 2.0 Web API or Web Application using Visual Studio 2017, the [Microsoft.NETCore.App](https://www.nuget.org/packages/Microsoft.NETCore.App) [metapackage](https://docs.microsoft.com/en-us/dotnet/core/packages#metapackages) is included as a dependency, which contains the [Azure Active Directory Authentication Library](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-authentication-libraries) (ADAL). ADAL makes authentication easier for developers with features including:
 
@@ -426,3 +447,23 @@ public void Configure(string name, OpenIdConnectOptions options)
 These options enable any ASP.NET Core site to use OpenId Connect based voice authentication.
 
 Configure these options in `appsettings.json`.
+
+# Troubleshooting
+
+## The sample AspNet Core App shows invalid request
+
+Q: I've got Sesame server running, but when I run the client app I see the following error: 
+
+```
+error:invalid_request
+error_description:The specified 'redirect_uri' parameter is not valid for this client application.
+```
+
+### Solution
+
+The problem may be with the database configuration used for Oidc. Use SQL Management Studio (or equivalent) to set desired values in your **OidcCache** database. The table that deals with client applications is **OpenIddictApplications**. The fields that need to be set, and must match your Oidc Login request, are:
+* ClientId
+* Client Secret
+* RedirectUris
+
+Pay special attention to the redirect uri and port number (for local dev)
