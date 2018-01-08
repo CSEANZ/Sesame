@@ -150,7 +150,7 @@ When running from Visual Studio Code or a terminal window things get a little mo
 The certificate is referenced in `Program.cs`
 
 ```csharp
-listenOptions.UseHttps("devcert.pfx", "dev");
+listenOptions.UseHttps("devcert.pfx", "south32");
 ```
 
 This certificate needs to be trusted. 
@@ -235,7 +235,7 @@ Add the following to the file:
 
 The two cache databases need to be initalised, but the OpenIddict and User database do not as they use [Entity Framework](https://docs.microsoft.com/en-us/ef/core/get-started/aspnetcore/new-db) to do the heavy lifting for us. 
 
-To setup the production cache, create two new databases called `SesameCache` and `SesameSessionState` in (localdb)\mssqllocaldb. To do this you can use [SQL Server Management Studio](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms) of you can use the SQL Server Object Explorer in Visual Studio 2017. 
+To setup the production cache, create two new databases called `SesameCache` and `SesameSessionState` in (localdb)\mssqllocaldb. To do this you can use [SQL Server Management Studio](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms) or you can use the SQL Server Object Explorer in Visual Studio 2017. 
 
 Next navigate to `Sesame\Sesame.Web` in a terminal window and run:
 

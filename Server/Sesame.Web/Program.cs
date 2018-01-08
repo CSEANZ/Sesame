@@ -30,7 +30,7 @@ namespace Sesame.Web
                     
                     if (File.Exists("devcert.pfx"))
                     {
-                        listenOptions.UseHttps("devcert.pfx", "dev");
+                        listenOptions.UseHttps("devcert.pfx", "south32");
                     }
                     else
                     {
