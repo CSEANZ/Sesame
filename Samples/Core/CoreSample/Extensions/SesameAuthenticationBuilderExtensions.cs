@@ -14,16 +14,16 @@ namespace CoreSample.Extensions
         public static AuthenticationBuilder AddSesame(this AuthenticationBuilder builder, Action<SesameOidcConfiguration> configureOptions)
         {
             builder.Services.Configure(configureOptions);
-            builder.Services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, ConfigureSesame>();
+            builder.Services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, ConfigureSesameOptions>();
             builder.AddOpenIdConnect();
             return builder;
         }
 
-        private class ConfigureSesame: IConfigureNamedOptions<OpenIdConnectOptions>
+        private class ConfigureSesameOptions: IConfigureNamedOptions<OpenIdConnectOptions>
         {
             private readonly SesameOidcConfiguration _sesameOptions;
 
-            public ConfigureSesame(IOptions<SesameOidcConfiguration> sesameOptions)
+            public ConfigureSesameOptions(IOptions<SesameOidcConfiguration> sesameOptions)
             {
                 _sesameOptions = sesameOptions.Value;
             }
