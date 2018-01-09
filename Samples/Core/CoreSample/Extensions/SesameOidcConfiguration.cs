@@ -1,6 +1,6 @@
 ﻿namespace CoreSample.Extensions
 {
-    public class AzureAdOptions
+    public class SesameOidcConfiguration
     {
         public string ClientId { get; set; }
 

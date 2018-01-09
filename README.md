@@ -155,7 +155,7 @@ listenOptions.UseHttps("devcert.pfx", "dev");
 
 This certificate needs to be trusted. 
 
-The certificate in the root of the project folder (Sesame\Sesame.Web ). This cert will need to be installed in Local Computer\Trusted Root Certification Authority folder (password is south32). Double click the certificate and follow the prompts to install it (on Windows). 
+The certificate in the root of the project folder (Sesame\Sesame.Web ). This cert will need to be installed in Local Computer\Trusted Root Certification Authority folder (password is dev). Double click the certificate and follow the prompts to install it (on Windows). 
 
 The process for creating a certificate and trusting on Mac can be found [here](https://www.humankode.com/asp-net-core/develop-locally-with-https-self-signed-certificates-and-asp-net-core).
 
@@ -235,7 +235,7 @@ Add the following to the file:
 
 The two cache databases need to be initalised, but the OpenIddict and User database do not as they use [Entity Framework](https://docs.microsoft.com/en-us/ef/core/get-started/aspnetcore/new-db) to do the heavy lifting for us. 
 
-To setup the production cache, create two new databases called `SesameCache` and `SesameSessionState` in (localdb)\mssqllocaldb. To do this you can use [SQL Server Management Studio](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms) of you can use the SQL Server Object Explorer in Visual Studio 2017. 
+To setup the production cache, create two new databases called `SesameCache` and `SesameSessionState` in (localdb)\mssqllocaldb. To do this you can use [SQL Server Management Studio](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms) or you can use the SQL Server Object Explorer in Visual Studio 2017. 
 
 Next navigate to `Sesame\Sesame.Web` in a terminal window and run:
 
@@ -263,6 +263,27 @@ To record each utterance of the chosen phrase and format to the [requirements of
 The Sesame.Web project was configured to obtain identities from Azure Active Directory using Visual Studio 2017.
 
 ![Work or School Accounts](https://user-images.githubusercontent.com/5225782/34583855-6c0b77ca-f1ed-11e7-8c8f-e59f06391d8b.PNG "Work or School Accounts")
+
+#### Configure Sesame to use your Azure Active Directory
+
+Log into the [Azure Portal](https://portal.azure.com) and search for *Active Directory*. 
+
+* From the sidebar, select *App Registrations*
+* Create a `New Application Registration`
+* Name your app and select *Web App / API*
+* Set the login url to `http://localhost:52945/signin-oidc` (or equivalent) and **save**
+* Under YOUR_NEW_APP > *Settings* > *Required Permissions*, make sure Sign in and Read User Profile is enabled. 
+* Click *Grant Permissions*.
+
+![Screenshot of Azure Portal AD App Registrations](Media/AzureAdAppRegistrationScreenshot.png) 
+
+
+Back in the Sesame code, open `appsettings.json` and set the following values under *OpenIdConnect* from the Azure Portal.
+
+* ClientId -> your Application ID from Azure Portal
+* ClientSecret -> Create a secret in *Settings* > *Keys* named `ClientSecret`
+* \<your tenant id> -> Guid found in *App Registrations* > *Endpoints* blade.
+
 
 #### Distributed Token Cache
 When creating a .NET Core 2.0 Web API or Web Application using Visual Studio 2017, the [Microsoft.NETCore.App](https://www.nuget.org/packages/Microsoft.NETCore.App) [metapackage](https://docs.microsoft.com/en-us/dotnet/core/packages#metapackages) is included as a dependency, which contains the [Azure Active Directory Authentication Library](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-authentication-libraries) (ADAL). ADAL makes authentication easier for developers with features including:
@@ -324,7 +345,7 @@ You can add and remove application settings here.
 There are a number of different authentication flows that are possible using OAuth (which OpenId Connect uses). The two flows supported by Sesame are "Authorization Code" and "Implicit". 
 
 ##### Authorization Code Flow
-This flow type is the most secure and support in ASP.NET Core sites amongst other things. During this flow two the client browser never has the possibility to see the token, thus the token is always kept safe. 
+This flow type is the most secure and support in ASP.NET Core sites amongst other things. During this flow the client browser never has the possibility to see the token, thus the token is always kept safe. 
 
 ##### Implicit Flow
 In this flow type an id_token is returned to the client and it may be intercepted / traded for an authentication token by the client. This flow type can be dangerous if you do not trust the client with powerful tokens. In Sesame, the tokens are only used by the calling site, so there is no danger if the tokens are intercepted by the caller. 
@@ -382,7 +403,7 @@ Both samples are generated with template code from Visual Studio 2017 with Azure
 
 ### Add to any site using OIDC
 
-The ASP.NET Core site is configured in two locations:
+Configuring a client website to use Sesame is simple. The client ASP.NET Core site must be configured in two locations:
 
 #### [Startup.cs](https://github.com/CSEANZ/Sesame/blob/master/Samples/Core/CoreSample/Startup.cs)
 
@@ -394,22 +415,22 @@ public void ConfigureServices(IServiceCollection services)
         sharedOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
     })
-    .AddAzureAd(options => Configuration.Bind("AzureAd", options))
+    .AddSesame(options => Configuration.Bind("Sesame", options))
     .AddCookie();
 
     services.AddMvc();
 }
 ```
 
-#### [AzureAdAuthenticationBuilderExtensions](https://github.com/CSEANZ/Sesame/blob/master/Samples/Core/CoreSample/Extensions/AzureAdAuthenticationBuilderExtensions.cs)
+#### [SesameAuthenticationBuilderExtensions](https://github.com/CSEANZ/Sesame/blob/master/Samples/Core/CoreSample/Extensions/SesameAuthenticationBuilderExtensions.cs)
 
 ```csharp
 public void Configure(string name, OpenIdConnectOptions options)
 {
-    options.ClientId = _azureOptions.ClientId;
-    options.Authority = _azureOptions.Authority;
-    options.ClientSecret = _azureOptions.ClientSecret;
-    options.CallbackPath = _azureOptions.CallbackPath;
+    options.ClientId = _sesameOptions.ClientId;
+    options.Authority = _sesameOptions.Authority;
+    options.ClientSecret = _sesameOptions.ClientSecret;
+    options.CallbackPath = _sesameOptions.CallbackPath;
     
     options.UseTokenLifetime = false;
     
@@ -423,6 +444,26 @@ public void Configure(string name, OpenIdConnectOptions options)
 }
 ```
 
-These options could be added to any ASP.NET Core site to add this style of OpenId Connect based voice authentication.
+These options enable any ASP.NET Core site to use OpenId Connect based voice authentication.
 
 Configure these options in `appsettings.json`.
+
+# Troubleshooting
+
+## The sample AspNet Core App shows invalid request
+
+Q: I've got Sesame server running, but when I run the client app I see the following error: 
+
+```
+error:invalid_request
+error_description:The specified 'redirect_uri' parameter is not valid for this client application.
+```
+
+### Solution
+
+The problem may be with the database configuration used for Oidc. Use SQL Management Studio (or equivalent) to set desired values in your **OidcCache** database. The table that deals with client applications is **OpenIddictApplications**. The fields that need to be set, and must match your Oidc Login request, are:
+* ClientId
+* Client Secret
+* RedirectUris
+
+Pay special attention to the redirect uri and port number (for local dev)

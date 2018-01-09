@@ -6,34 +6,34 @@ using Microsoft.Extensions.Options;
 
 namespace CoreSample.Extensions
 {
-    public static class AzureAdAuthenticationBuilderExtensions
+    public static class SesameAuthenticationBuilderExtensions
     {        
-        public static AuthenticationBuilder AddAzureAd(this AuthenticationBuilder builder)
-            => builder.AddAzureAd(_ => { });
+        public static AuthenticationBuilder AddSesame(this AuthenticationBuilder builder)
+            => builder.AddSesame(_ => { });
 
-        public static AuthenticationBuilder AddAzureAd(this AuthenticationBuilder builder, Action<AzureAdOptions> configureOptions)
+        public static AuthenticationBuilder AddSesame(this AuthenticationBuilder builder, Action<SesameOidcConfiguration> configureOptions)
         {
             builder.Services.Configure(configureOptions);
-            builder.Services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, ConfigureAzureOptions>();
+            builder.Services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, ConfigureSesameOptions>();
             builder.AddOpenIdConnect();
             return builder;
         }
 
-        private class ConfigureAzureOptions: IConfigureNamedOptions<OpenIdConnectOptions>
+        private class ConfigureSesameOptions: IConfigureNamedOptions<OpenIdConnectOptions>
         {
-            private readonly AzureAdOptions _azureOptions;
+            private readonly SesameOidcConfiguration _sesameOptions;
 
-            public ConfigureAzureOptions(IOptions<AzureAdOptions> azureOptions)
+            public ConfigureSesameOptions(IOptions<SesameOidcConfiguration> sesameOptions)
             {
-                _azureOptions = azureOptions.Value;
+                _sesameOptions = sesameOptions.Value;
             }
 
             public void Configure(string name, OpenIdConnectOptions options)
             {
-                options.ClientId = _azureOptions.ClientId;
-                options.Authority = _azureOptions.Authority;
-                options.ClientSecret = _azureOptions.ClientSecret;
-                options.CallbackPath = _azureOptions.CallbackPath;
+                options.ClientId = _sesameOptions.ClientId;
+                options.Authority = _sesameOptions.Authority;
+                options.ClientSecret = _sesameOptions.ClientSecret;
+                options.CallbackPath = _sesameOptions.CallbackPath;
                 
                 options.UseTokenLifetime = false;
                 

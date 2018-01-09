@@ -25,7 +25,7 @@ namespace CoreSample
                 sharedOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
-            .AddAzureAd(options => Configuration.Bind("AzureAd", options))
+            .AddSesame(options => Configuration.Bind("Sesame", options))
             .AddCookie();
 
             services.AddMvc();
