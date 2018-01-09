@@ -150,12 +150,12 @@ When running from Visual Studio Code or a terminal window things get a little mo
 The certificate is referenced in `Program.cs`
 
 ```csharp
-listenOptions.UseHttps("devcert.pfx", "south32");
+listenOptions.UseHttps("devcert.pfx", "dev");
 ```
 
 This certificate needs to be trusted. 
 
-The certificate in the root of the project folder (Sesame\Sesame.Web ). This cert will need to be installed in Local Computer\Trusted Root Certification Authority folder (password is south32). Double click the certificate and follow the prompts to install it (on Windows). 
+The certificate in the root of the project folder (Sesame\Sesame.Web ). This cert will need to be installed in Local Computer\Trusted Root Certification Authority folder (password is dev). Double click the certificate and follow the prompts to install it (on Windows). 
 
 The process for creating a certificate and trusting on Mac can be found [here](https://www.humankode.com/asp-net-core/develop-locally-with-https-self-signed-certificates-and-asp-net-core).
 
