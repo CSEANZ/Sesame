@@ -279,7 +279,7 @@ Log into the [Azure Portal](https://portal.azure.com) and search for *Active Dir
 
 * Create a `New Application Registration`
 * Name your app and select *Web App / API*
-* Set the login url to `http://localhost:52945/signin-oidc` (or equivalent) and **save**
+* Set the login url to `http://localhost:62210/signin-oidc` (or equivalent) and **save**
 
 ![Screenshot of Azure Portal AD App Registrations](Media/registerSesameToAD.PNG) 
 
