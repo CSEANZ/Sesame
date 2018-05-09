@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Extensions;
 using AspNet.Security.OpenIdConnect.Primitives;
 using AspNet.Security.OpenIdConnect.Server;
-
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -24,8 +23,7 @@ using Sesame.Web.Helpers;
 using Sesame.Web.ViewModels.Authorization;
 using Sesame.Web.ViewModels.Shared;
 using WebApplication1.ViewModels.Authorization;
-using Sesame.Web.Services;
-using Universal.Common.Extensions;
+
 
 namespace Sesame.Web.Controllers
 {

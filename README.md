@@ -7,6 +7,8 @@ This project allows you to add voice identification to any site compatible with 
 
 The core tenet of the approach taken in this solution is to ensure it doesn't tightly bind our solution to the client site's source code. The end result is an [OAuth2](https://oauth.net/2/)/[OpenID Connect](http://openid.net/connect/) compatible authentication web site that can be used to authenticate using voice from any website that supports an OpenID Connect based authentication flow. 
 
+![Sesame high level flow](Media/Flow.PNG) 
+
 The project was developed as part of a collaboration by [South32](https://www.south32.net/) and Microsoft engineers.  
 
 ## Key Technologies
@@ -239,7 +241,7 @@ To setup the production cache, create two new databases called `SesameCache` and
 
 Next navigate to `Sesame\Sesame.Web` in a terminal window and run:
 
-```dotnet sql-cache create "Server=(localdb)\mssqllocaldb;Database=SesameSessionState;Trusted_Connection=True;MultipleActiveResultSets=true;" dbo Cache```
+```dotnet sql-cache create "Server=(localdb)\mssqllocaldb;Database=SesameSessionState;Trusted_Connection=True;MultipleActiveResultSets=true;" dbo State```
 
 and
 
@@ -268,22 +270,54 @@ The Sesame.Web project was configured to obtain identities from Azure Active Dir
 
 Log into the [Azure Portal](https://portal.azure.com) and search for *Active Directory*. 
 
+![Screenshot of Azure Portal adding Azure active directory](Media/AzureAD.PNG) 
+
+
 * From the sidebar, select *App Registrations*
+
+![Screenshot of Azure Portal AD App Registrations](Media/AddSesameToAD.PNG) 
+
 * Create a `New Application Registration`
 * Name your app and select *Web App / API*
-* Set the login url to `http://localhost:52945/signin-oidc` (or equivalent) and **save**
+* Set the login url to `http://localhost:62210/signin-oidc` (or equivalent) and **save**
+
+![Screenshot of Azure Portal AD App Registrations](Media/registerSesameToAD.PNG) 
+
+
 * Under YOUR_NEW_APP > *Settings* > *Required Permissions*, make sure Sign in and Read User Profile is enabled. 
+
+![Screenshot of granting permission step 1](Media/Permissions.PNG) 
+
+![Screenshot of granting permission step 2](Media/Permissions2.PNG) 
+
+![Screenshot of granting permission step 3](Media/Permissions3.PNG) 
+
 * Click *Grant Permissions*.
 
-![Screenshot of Azure Portal AD App Registrations](Media/AzureAdAppRegistrationScreenshot.png) 
+![Screenshot of granting permission step 4](Media/Permissions4.PNG) 
+
+
+
+
+*Generate client secrete -> Create a secret in *Settings* > *Keys* named `ClientSecret`
+
+![Screenshot of generating Client Secret step 1](Media/generateClientSecret.PNG) 
+
+![Screenshot of generating Client Secret step 2](Media/generateClientSecret2.PNG) 
+
+![Screenshot of generating Client Secret step 3](Media/generateClientSecret3.PNG) 
 
 
 Back in the Sesame code, open `appsettings.json` and set the following values under *OpenIdConnect* from the Azure Portal.
 
 * ClientId -> your Application ID from Azure Portal
-* ClientSecret -> Create a secret in *Settings* > *Keys* named `ClientSecret`
-* \<your tenant id> -> Guid found in *App Registrations* > *Endpoints* blade.
+![Screenshot of where the Client Id is](Media/ClientId.PNG) 
 
+
+* ClientSecret -> the value you saved by follwing steps of create a secret in *Settings* > *Keys* 
+
+* \<your tenant id> -> Guid found in *Azure Active directory* > *properties* blade.
+![Screenshot of where the tenat Id is](Media/TenantId.PNG)
 
 #### Distributed Token Cache
 When creating a .NET Core 2.0 Web API or Web Application using Visual Studio 2017, the [Microsoft.NETCore.App](https://www.nuget.org/packages/Microsoft.NETCore.App) [metapackage](https://docs.microsoft.com/en-us/dotnet/core/packages#metapackages) is included as a dependency, which contains the [Azure Active Directory Authentication Library](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-authentication-libraries) (ADAL). ADAL makes authentication easier for developers with features including:

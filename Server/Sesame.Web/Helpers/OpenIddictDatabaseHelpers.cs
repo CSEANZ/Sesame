@@ -25,7 +25,7 @@ namespace Sesame.Web.Helpers
             }
 
             // Create a new service scope to ensure the database context is correctly disposed when this methods returns.
-                using (var scope = services.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            using (var scope = services.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<DbContext>();
                 await context.Database.EnsureCreatedAsync(cancellationToken);
@@ -50,8 +50,8 @@ namespace Sesame.Web.Helpers
 
                 // To test this sample with Postman, use the following settings:
                 //
-                // * Authorization URL: http://localhost:54540/connect/authorize
-                // * Access token URL: http://localhost:54540/connect/token
+                // * Authorization URL: http://localhost:62210/connect/authorize
+                // * Access token URL: http://localhost:62210/connect/token
                 // * Client ID: postman
                 // * Client secret: [blank] (not used with public clients)
                 // * Scope: openid email profile roles
@@ -69,7 +69,7 @@ namespace Sesame.Web.Helpers
                     await manager.CreateAsync(descriptor, cancellationToken);
                 }
 
-               
+
             }
         }
     }
