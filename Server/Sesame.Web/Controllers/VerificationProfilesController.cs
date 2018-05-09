@@ -3,12 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Http;
 using System.IO;
-using System.Text;
 using Universal.Microsoft.CognitiveServices.SpeakerRecognition;
-using Newtonsoft.Json;
 using Universal.Common;
 using Universal.Common.Extensions;
 using Microsoft.Extensions.Configuration;
@@ -25,20 +21,19 @@ namespace Sesame.Web.Controllers
     public class VerificationProfilesController : Controller
     {
 
-        private SpeakerRecognitionClient mSpeakerRecognitionClient;
-        private ISessionStateService mSessionStateService;
-
-        private static List<string> mVerificationPhrases = null;
-        private IPersistentStorageService _persistantStorageService;
+        private readonly SpeakerRecognitionClient _speakerRecognitionClient;
+        private readonly ISessionStateService _sessionStateService;
+        private static List<string> _verificationPhrases = null;
+        private readonly IPersistentStorageService _persistantStorageService;
 
         public VerificationProfilesController(IConfiguration configuration,
             ISessionStateService sessionStateService,
-            SpeakerRecognitionClient mSpeakerRecognitionClient,
+            SpeakerRecognitionClient speakerRecognitionClient,
             IPersistentStorageService persistantStorageService)
         {
             _persistantStorageService = persistantStorageService;
-            this.mSpeakerRecognitionClient = mSpeakerRecognitionClient;
-            mSessionStateService = sessionStateService;
+            _speakerRecognitionClient = speakerRecognitionClient;
+            _sessionStateService = sessionStateService;
         }
 
 
@@ -52,11 +47,11 @@ namespace Sesame.Web.Controllers
         public async Task<IActionResult> GetVerificationPhrasesAsync([FromQuery]string locale)
         {
             // These rarely, if ever change, so should be cached and reused. Workaround for lack of static support.
-            if (mVerificationPhrases == null)
+            if (_verificationPhrases == null)
             {
                 try
                 {
-                    mVerificationPhrases = await mSpeakerRecognitionClient.ListAllSupportedVerificationPhrasesAsync(locale.IsNullOrEmpty() ? "en-us" : locale);
+                    _verificationPhrases = await _speakerRecognitionClient.ListAllSupportedVerificationPhrasesAsync(locale.IsNullOrEmpty() ? "en-us" : locale);
                 }
                 catch (HttpException e)
                 {
@@ -64,7 +59,7 @@ namespace Sesame.Web.Controllers
                 }
             }
 
-            return Ok(mVerificationPhrases);
+            return Ok(_verificationPhrases);
         }
 
         /// <summary>
@@ -86,7 +81,7 @@ namespace Sesame.Web.Controllers
 
                 if (result.IsNullOrEmpty())
                 {
-                    result = await mSpeakerRecognitionClient.CreateVerificationProfileAsync();
+                    result = await _speakerRecognitionClient.CreateVerificationProfileAsync();
                     await _persistantStorageService.CreateSpeakerProfileAsync(userPrincipalName, SpeakerProfileType.Verification, result);
                 }
                 return Ok(result);
@@ -113,7 +108,7 @@ namespace Sesame.Web.Controllers
                     return StatusCode(400, "new user");
                 }
 
-                return Ok(await mSpeakerRecognitionClient.GetVerificationProfileAsync(verificationProfileId));
+                return Ok(await _speakerRecognitionClient.GetVerificationProfileAsync(verificationProfileId));
             }
             catch (HttpException e)
             {
@@ -129,7 +124,7 @@ namespace Sesame.Web.Controllers
         {
             try
             {
-                await mSpeakerRecognitionClient.DeleteVerificationProfileAsync(verificationProfileId);
+                await _speakerRecognitionClient.DeleteVerificationProfileAsync(verificationProfileId);
                 return Ok();
             }
             catch (HttpException e)
@@ -180,7 +175,7 @@ namespace Sesame.Web.Controllers
 
                 try
                 {
-                    var result = await mSpeakerRecognitionClient.CreateVerificationProfileEnrollmentAsync(verificationProfileId, waveBytes);
+                    var result = await _speakerRecognitionClient.CreateVerificationProfileEnrollmentAsync(verificationProfileId, waveBytes);
 
                     await _persistantStorageService.UpdateSpeakerVerificationPhraseAsync(userPrincipalName, result.Phrase);
                     return Ok(result);
@@ -238,7 +233,7 @@ namespace Sesame.Web.Controllers
         {
             try
             {
-                await mSpeakerRecognitionClient.ResetVerificationProfileEnrollmentsAsync(verificationProfileId);
+                await _speakerRecognitionClient.ResetVerificationProfileEnrollmentsAsync(verificationProfileId);
                 return Ok();
             }
             catch (HttpException e)
@@ -286,12 +281,12 @@ namespace Sesame.Web.Controllers
                         return StatusCode(400, "No valid speaker profile matching PIN.");
                     }
 
-                    var result = await mSpeakerRecognitionClient.VerifyAsync(verificationProfileId, waveBytes);
+                    var result = await _speakerRecognitionClient.VerifyAsync(verificationProfileId, waveBytes);
 
                     if (result.Result == "Accept")
                     {
-                        mSessionStateService.Set<bool>("VoiceAuthenticated", true);
-                        mSessionStateService.Set<string>("UserPrincipalName", await _persistantStorageService.GetSpeakerByPinAsync(pin));
+                        _sessionStateService.Set<bool>("VoiceAuthenticated", true);
+                        _sessionStateService.Set<string>("UserPrincipalName", await _persistantStorageService.GetSpeakerByPinAsync(pin));
                     }
 
                     return Ok(result);

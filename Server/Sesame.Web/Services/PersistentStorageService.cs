@@ -87,6 +87,12 @@ namespace Sesame.Web.Services
             return existing?.Pin;
         }
 
+        public async Task<MappedAuthentication> GetUserByVerificationProfileId(string verificationProfileId)
+        {
+            var user = await _context.UserMaps.SingleOrDefaultAsync(_ => _.ProfileId == verificationProfileId);
+            return user;
+        }
+
         public async Task<string> GetSpeakerByPinAsync(string pin)
         {
             var existing = await

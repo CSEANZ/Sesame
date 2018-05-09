@@ -384,6 +384,11 @@ This flow type is the most secure and support in ASP.NET Core sites amongst othe
 ##### Implicit Flow
 In this flow type an id_token is returned to the client and it may be intercepted / traded for an authentication token by the client. This flow type can be dangerous if you do not trust the client with powerful tokens. In Sesame, the tokens are only used by the calling site, so there is no danger if the tokens are intercepted by the caller. 
 
+# Resource Owner Password Credential Flow (Trusted Application/device)
+South 32 is planning to use a head set which doesn't support web browser and they need to build in the native app that has a login page on the device and use sesame services to authenticate and authorize user by getting user voice print.
+
+![Resource Owner Password Credential Flow](Media/ResouceOwnerPasswordCredentialFlow.PNG) 
+
 #### Configuring the OpenId Connect Server
 
 The server flow is configured in [`OpenIddictServerExtensions`](https://github.com/CSEANZ/Sesame/blob/master/Server/Sesame.Web/Extensions/OpenIddictServerExtensions.cs) which is called from `Startup.cs`. 
@@ -481,6 +486,8 @@ public void Configure(string name, OpenIdConnectOptions options)
 These options enable any ASP.NET Core site to use OpenId Connect based voice authentication.
 
 Configure these options in `appsettings.json`.
+
+
 
 # Troubleshooting
 
