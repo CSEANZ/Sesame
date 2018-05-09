@@ -281,7 +281,7 @@ Log into the [Azure Portal](https://portal.azure.com) and search for *Active Dir
 * Name your app and select *Web App / API*
 * Set the login url to `http://localhost:52945/signin-oidc` (or equivalent) and **save**
 
-![Screenshot of Azure Portal AD App Registrations](Media/AddSesameToAD.PNG) 
+![Screenshot of Azure Portal AD App Registrations](Media/registerSesameToAD.PNG) 
 
 
 * Under YOUR_NEW_APP > *Settings* > *Required Permissions*, make sure Sign in and Read User Profile is enabled. 
@@ -290,11 +290,13 @@ Log into the [Azure Portal](https://portal.azure.com) and search for *Active Dir
 
 ![Screenshot of granting permission step 2](Media/Permissions2.PNG) 
 
+![Screenshot of granting permission step 3](Media/Permissions3.PNG) 
+
 * Click *Grant Permissions*.
 
-![Screenshot of granting permission step 2](Media/Permissions3.PNG) 
+![Screenshot of granting permission step 4](Media/Permissions4.PNG) 
 
-![Screenshot of register Sesame To AD](Media/registerSesameToAD.PNG) 
+
 
 
 *Generate client secrete -> Create a secret in *Settings* > *Keys* named `ClientSecret`
