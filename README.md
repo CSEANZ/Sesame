@@ -270,52 +270,52 @@ The Sesame.Web project was configured to obtain identities from Azure Active Dir
 
 Log into the [Azure Portal](https://portal.azure.com) and search for *Active Directory*. 
 
-![Screenshot of Azure Portal adding Azure active directory](Media/AzureAD.png) 
+![Screenshot of Azure Portal adding Azure active directory](Media/AzureAD.PNG) 
 
 
 * From the sidebar, select *App Registrations*
 
-![Screenshot of Azure Portal AD App Registrations](Media/AddSesameToAD.png) 
+![Screenshot of Azure Portal AD App Registrations](Media/AddSesameToAD.PNG) 
 
 * Create a `New Application Registration`
 * Name your app and select *Web App / API*
 * Set the login url to `http://localhost:52945/signin-oidc` (or equivalent) and **save**
 
-![Screenshot of Azure Portal AD App Registrations](Media/AddSesameToAD.png) 
+![Screenshot of Azure Portal AD App Registrations](Media/AddSesameToAD.PNG) 
 
 
 * Under YOUR_NEW_APP > *Settings* > *Required Permissions*, make sure Sign in and Read User Profile is enabled. 
 
-![Screenshot of granting permission step 1](Media/Permissions.png) 
+![Screenshot of granting permission step 1](Media/Permissions.PNG) 
 
-![Screenshot of granting permission step 2](Media/Permissions2.png) 
+![Screenshot of granting permission step 2](Media/Permissions2.PNG) 
 
 * Click *Grant Permissions*.
 
-![Screenshot of granting permission step 2](Media/Permissions3.png) 
+![Screenshot of granting permission step 2](Media/Permissions3.PNG) 
 
-![Screenshot of register Sesame To AD](Media/registerSesameToAD.png) 
+![Screenshot of register Sesame To AD](Media/registerSesameToAD.PNG) 
 
 
 *Generate client secrete -> Create a secret in *Settings* > *Keys* named `ClientSecret`
 
-![Screenshot of generating Client Secret step 1](Media/generateClientSecret.png) 
+![Screenshot of generating Client Secret step 1](Media/generateClientSecret.PNG) 
 
-![Screenshot of generating Client Secret step 2](Media/generateClientSecret2.png) 
+![Screenshot of generating Client Secret step 2](Media/generateClientSecret2.PNG) 
 
-![Screenshot of generating Client Secret step 3](Media/generateClientSecret3.png) 
+![Screenshot of generating Client Secret step 3](Media/generateClientSecret3.PNG) 
 
 
 Back in the Sesame code, open `appsettings.json` and set the following values under *OpenIdConnect* from the Azure Portal.
 
 * ClientId -> your Application ID from Azure Portal
-![Screenshot of where the Client Id is](Media/ClientId.png) 
+![Screenshot of where the Client Id is](Media/ClientId.PNG) 
 
 
 * ClientSecret -> the value you saved by follwing steps of create a secret in *Settings* > *Keys* 
 
 * \<your tenant id> -> Guid found in *Azure Active directory* > *properties* blade.
-![Screenshot of where the tenat Id is](Media/TenantId.png)
+![Screenshot of where the tenat Id is](Media/TenantId.PNG)
 
 #### Distributed Token Cache
 When creating a .NET Core 2.0 Web API or Web Application using Visual Studio 2017, the [Microsoft.NETCore.App](https://www.nuget.org/packages/Microsoft.NETCore.App) [metapackage](https://docs.microsoft.com/en-us/dotnet/core/packages#metapackages) is included as a dependency, which contains the [Azure Active Directory Authentication Library](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-authentication-libraries) (ADAL). ADAL makes authentication easier for developers with features including:
