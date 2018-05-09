@@ -270,29 +270,29 @@ The Sesame.Web project was configured to obtain identities from Azure Active Dir
 
 Log into the [Azure Portal](https://portal.azure.com) and search for *Active Directory*. 
 
-![Screenshot of Azure Portal adding Azure active directory](Media/AzureAD) 
+![Screenshot of Azure Portal adding Azure active directory](Media/AzureAD.png) 
 
 
 * From the sidebar, select *App Registrations*
 
-![Screenshot of Azure Portal AD App Registrations](Media/AddSesameToAD) 
+![Screenshot of Azure Portal AD App Registrations](Media/AddSesameToAD.png) 
 
 * Create a `New Application Registration`
 * Name your app and select *Web App / API*
 * Set the login url to `http://localhost:52945/signin-oidc` (or equivalent) and **save**
 
-![Screenshot of Azure Portal AD App Registrations](Media/AddSesameToAD) 
+![Screenshot of Azure Portal AD App Registrations](Media/AddSesameToAD.png) 
 
 
 * Under YOUR_NEW_APP > *Settings* > *Required Permissions*, make sure Sign in and Read User Profile is enabled. 
 
-![Screenshot of granting permission step 1](Media/Permissions) 
+![Screenshot of granting permission step 1](Media/Permissions.png) 
 
-![Screenshot of granting permission step 2](Media/Permissions2) 
+![Screenshot of granting permission step 2](Media/Permissions2.png) 
 
 * Click *Grant Permissions*.
 
-![Screenshot of granting permission step 2](Media/Permissions3) 
+![Screenshot of granting permission step 2](Media/Permissions3.png) 
 
 ![Screenshot of register Sesame To AD](Media/registerSesameToAD.png) 
 
