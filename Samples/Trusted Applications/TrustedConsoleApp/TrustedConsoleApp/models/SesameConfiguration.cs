@@ -8,7 +8,7 @@ namespace TrustedConsoleApp.models
     {
 
         public string Authority { get; set; }
-        
 
+        public string RsaPublicKeyXml { get; set; }
     }
 }
