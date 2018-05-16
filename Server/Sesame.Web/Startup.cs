@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,20 +7,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Sesame.Web.Services;
-using Microsoft.Extensions.Caching.Distributed;
-using OpenIddict.Core;
-using OpenIddict.Models;
 using Sesame.Web.Extensions;
 using Sesame.Web.Helpers;
 using Microsoft.AspNetCore.Http;
 using Sesame.Web.Contracts;
 using Sesame.Web.DatabaseContexts;
+using Sesame.Web.Models;
 using Universal.Microsoft.CognitiveServices.SpeakerRecognition;
 
 namespace Sesame.Web
@@ -63,6 +55,10 @@ namespace Sesame.Web
             services.AddTransient<IPersistentStorageService, PersistentStorageService>();
 
             services.AddSingleton<SpeakerRecognitionClient>(new SpeakerRecognitionClient(Configuration["SpeakerRecognitionKey"]));
+
+
+            services.Configure<JwtSettings>(Configuration.GetSection("jwt"));
+            services.AddSingleton<IJwtHandler, JwtHandler>();
 
             if (HostingEnvironment.IsDevelopment())
             {

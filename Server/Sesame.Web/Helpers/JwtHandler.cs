@@ -39,9 +39,8 @@ namespace Sesame.Web.Helpers
         {
             using (var publicRsa = RSA.Create())
             {
-                var publicKeyXml = File.ReadAllText(_settings.RsaPublicKeyXml);
+                var publicKeyXml = File.ReadAllText($@"{Directory.GetCurrentDirectory()}/Keys/{_settings.RsaPublicKeyXml}");
                 Xmlhelper.FromXmlString(publicRsa, publicKeyXml);
-                // publicRsa.FromXmlString(publicKeyXml);
                 _issuerSigningKey = new RsaSecurityKey(publicRsa);
             }
 
@@ -52,8 +51,7 @@ namespace Sesame.Web.Helpers
 
             using (RSA privateRsa = RSA.Create())
             {
-                var privateKeyXml = File.ReadAllText(_settings.RsaPrivateKeyXml);
-                // privateRsa.FromXmlString(privateKeyXml);
+                var privateKeyXml = File.ReadAllText($@"{Directory.GetCurrentDirectory()}/Keys/{_settings.RsaPrivateKeyXml}");
                 Xmlhelper.FromXmlString(privateRsa, privateKeyXml);
                 var privateKey = new RsaSecurityKey(privateRsa);
                 _signingCredentials = new SigningCredentials(privateKey, SecurityAlgorithms.RsaSha256);
@@ -103,7 +101,6 @@ namespace Sesame.Web.Helpers
                 Expires = exp
             };
         }
-
 
         public RsaSecurityKey GetPublicRsaSecurityKey()
         {
