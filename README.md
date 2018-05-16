@@ -376,7 +376,7 @@ You can add and remove application settings here.
 
 #### Authentication Flow Types
 
-There are a number of different authentication flows that are possible using OAuth (which OpenId Connect uses). The two flows supported by Sesame are "Authorization Code" and "Implicit". 
+There are a number of different authentication flows that are possible using OAuth (which OpenId Connect uses). The three flows supported by Sesame are "Authorization Code" and "Implicit". 
 
 ##### Authorization Code Flow
 This flow type is the most secure and support in ASP.NET Core sites amongst other things. During this flow the client browser never has the possibility to see the token, thus the token is always kept safe. 
@@ -384,8 +384,50 @@ This flow type is the most secure and support in ASP.NET Core sites amongst othe
 ##### Implicit Flow
 In this flow type an id_token is returned to the client and it may be intercepted / traded for an authentication token by the client. This flow type can be dangerous if you do not trust the client with powerful tokens. In Sesame, the tokens are only used by the calling site, so there is no danger if the tokens are intercepted by the caller. 
 
-# Resource Owner Password Credential Flow (Trusted Application/device)
-South 32 is planning to use a head set which doesn't support web browser and they need to build in the native app that has a login page on the device and use sesame services to authenticate and authorize user by getting user voice print.
+##### Resource Owner Password Credential Flow (Trusted Application/device)
+South
+32 is planning to use a headset which doesn't support embedded web browser and they need to build in the native app that has a login page on the device and use sesame services to authenticate and authorize the user by getting user voice print.
+
+When the client application belongs to the owner of the OAuth server, we can trust the client application and get username & password (pin and voice print) directly in the app instead of opening the web browser.   
+
+you can test the flow by running sesame server and registring your voice print and getting your pin. Now,you can run TrustedConsoleApp console app in `\Samples\Trusted Applications\TrustedConsoleApp`. After entering your pin, system will show you your phrase and recoring your voice, hit enter when you finish. TrustedConsoleApp will send your pin and voice to sesame oauth server to verify and get the authentication token. You can see the result token on the screen. 
+
+
+###### Verifying token
+
+returned token is encrypted and signed.
+
+you can manually verify and decode your token by using `https://jwt.io/` site. Select RS256 ALGORITHM and paste the private and public keys.You can find keys.txt in keys folder in the Sesame project.
+
+in code, you can call `VerifyToken` to verify your token.
+
+```csharp
+ public static JwtSecurityToken VerifyToken(string token)
+        {
+            var publicRsa = RSA.Create();
+
+            //var currDir = Assembly.GetExecutingAssembly().Location;
+            //var currDir = Directory.GetCurrentDirectory();
+            var publicKeyXml = File.ReadAllText($@"{Directory.GetCurrentDirectory()}/Keys/{_sesameConfiguration.RsaPublicKeyXml}");
+            XmlHelper.FromXmlString(publicRsa, publicKeyXml);
+            var publicRsaSecurityKey = new RsaSecurityKey(publicRsa);
+
+            var validationParameters = new TokenValidationParameters
+            {
+                RequireExpirationTime = true,
+                RequireSignedTokens = true,
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = publicRsaSecurityKey
+            };
+
+            var handler = new JwtSecurityTokenHandler();
+            var result = handler.ValidateToken(token, validationParameters, out var validatedSecurityToken);
+            var validatedJwt = validatedSecurityToken as JwtSecurityToken;
+            return validatedJwt;
+        }
+```
 
 ![Resource Owner Password Credential Flow](Media/ResouceOwnerPasswordCredentialFlow.PNG) 
 
