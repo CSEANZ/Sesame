@@ -4,10 +4,8 @@
  * the license and the contributors participating to this project.
  */
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -25,7 +23,6 @@ using Sesame.Web.Helpers;
 using Sesame.Web.Services;
 using Sesame.Web.ViewModels.Authorization;
 using Sesame.Web.ViewModels.Shared;
-using Universal.Common;
 using Universal.Microsoft.CognitiveServices.SpeakerRecognition;
 using WebApplication1.ViewModels.Authorization;
 
@@ -40,9 +37,6 @@ namespace Sesame.Web.Controllers
         private readonly OpenIddictApplicationManager<OpenIddictApplication> _applicationManager;
         private readonly IOptions<IdentityOptions> _identityOptions;
         private readonly ISessionStateService _sessionStateService;
-        private readonly IPersistentStorageService _persistantStorageService;
-        private readonly SpeakerRecognitionClient _speakerRecognitionClient;
-        private readonly IJwtHandler _jwtHandler;
 
         public AuthorizationController(
             OpenIddictApplicationManager<OpenIddictApplication> applicationManager,
@@ -54,8 +48,6 @@ namespace Sesame.Web.Controllers
             _applicationManager = applicationManager;
             _identityOptions = identityOptions;
             _sessionStateService = sessionStateService;
-            _persistantStorageService = persistantStorageService;
-            _speakerRecognitionClient = speakerRecognitionClient;
         }
 
         /// <summary>
@@ -239,9 +231,15 @@ namespace Sesame.Web.Controllers
         //TODO: this is an example 
         private async Task<AuthenticationTicket> CreateTicketAsync(
             OpenIdConnectRequest request,
-            AuthenticateResult authResult = null)
+            AuthenticateResult authResult)
         {
-            AuthenticationProperties properties = authResult.Properties;
+
+            if (authResult == null)
+            {
+                return null;
+            }
+
+            var properties = authResult.Properties;
 
             var userId = authResult.Principal.Claims.FirstOrDefault(_ => _.Type == OpenIdConnectConstants.Claims.Subject)?.Value;
 
@@ -336,57 +334,7 @@ namespace Sesame.Web.Controllers
             return ticket;
         }
 
-        // AuthenticationToken
-        // connect/authorize/verify/{verificationProfileId}
-        // connect/authorize
-        [HttpPost]
-        [Route("~/connect/authorize/combinedtest/{verificationProfileId}")]
-        public async Task<IActionResult> AuthenticationToken(string verificationProfileId)
-        {
-            var user =await  _persistantStorageService.GetUserByVerificationProfileId(verificationProfileId);
-
-            if (user == null)
-            {
-                return StatusCode(500, "Invalid verification profile provided.");
-            }
-
-            using (var memoryStream = new MemoryStream())
-            {
-
-                try
-                {
-                    await Request.Body.CopyToAsync(memoryStream);
-                    byte[] waveBytes = memoryStream.ToArray();
-
-                    VerificationResult result = await _speakerRecognitionClient.VerifyAsync(verificationProfileId, waveBytes);
-
-                    if (result.Result == "Accept")
-                    {
-                        var claims = new Dictionary<string, string>
-                        {
-                            {OpenIdConnectConstants.Claims.Subject, user.UserPrinipleName },
-                            {OpenIdConnectConstants.Claims.Name, "" },
-                            {OpenIdConnectConstants.Claims.GivenName, ""},
-                            {OpenIdConnectConstants.Claims.FamilyName, "" },
-                        };
-
-                        return Json(new { result = result.Result, jwt = _jwtHandler.Create(claims) });
-                    }
-                    else
-                    {
-                        return Json(new { result = result.Result });
-                    }
-                }
-                catch (HttpException e)
-                {
-                    return StatusCode((int)e.StatusCode, e.Message);
-                }
-                catch (Exception e)
-                {
-                    return StatusCode(500, e.ToString());
-                }
-            }
-        }
+       
 
     }
 }
