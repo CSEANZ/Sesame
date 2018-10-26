@@ -20,8 +20,10 @@ using OpenIddict.Core;
 using OpenIddict.Models;
 using Sesame.Web.Contracts;
 using Sesame.Web.Helpers;
+using Sesame.Web.Services;
 using Sesame.Web.ViewModels.Authorization;
 using Sesame.Web.ViewModels.Shared;
+using Universal.Microsoft.CognitiveServices.SpeakerRecognition;
 using WebApplication1.ViewModels.Authorization;
 
 
@@ -34,13 +36,14 @@ namespace Sesame.Web.Controllers
     {
         private readonly OpenIddictApplicationManager<OpenIddictApplication> _applicationManager;
         private readonly IOptions<IdentityOptions> _identityOptions;
-        private ISessionStateService _sessionStateService;
+        private readonly ISessionStateService _sessionStateService;
 
         public AuthorizationController(
             OpenIddictApplicationManager<OpenIddictApplication> applicationManager,
             IOptions<IdentityOptions> identityOptions,
-            ISessionStateService sessionStateService
-        )
+            ISessionStateService sessionStateService,
+            IPersistentStorageService persistantStorageService, 
+            SpeakerRecognitionClient speakerRecognitionClient)
         {
             _applicationManager = applicationManager;
             _identityOptions = identityOptions;
@@ -228,9 +231,15 @@ namespace Sesame.Web.Controllers
         //TODO: this is an example 
         private async Task<AuthenticationTicket> CreateTicketAsync(
             OpenIdConnectRequest request,
-            AuthenticateResult authResult = null)
+            AuthenticateResult authResult)
         {
-            AuthenticationProperties properties = authResult.Properties;
+
+            if (authResult == null)
+            {
+                return null;
+            }
+
+            var properties = authResult.Properties;
 
             var userId = authResult.Principal.Claims.FirstOrDefault(_ => _.Type == OpenIdConnectConstants.Claims.Subject)?.Value;
 
@@ -324,5 +333,8 @@ namespace Sesame.Web.Controllers
 
             return ticket;
         }
+
+       
+
     }
 }

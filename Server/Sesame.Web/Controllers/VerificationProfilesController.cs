@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Http;
 using System.IO;
-using System.Text;
 using Universal.Microsoft.CognitiveServices.SpeakerRecognition;
-using Newtonsoft.Json;
 using Universal.Common;
 using Universal.Common.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using AspNet.Security.OpenIdConnect.Primitives;
 using Sesame.Web.Contracts;
+using Sesame.Web.Helpers;
 using Sesame.Web.Models;
 using Sesame.Web.Services;
 
@@ -25,20 +23,22 @@ namespace Sesame.Web.Controllers
     public class VerificationProfilesController : Controller
     {
 
-        private SpeakerRecognitionClient mSpeakerRecognitionClient;
-        private ISessionStateService mSessionStateService;
-
-        private static List<string> mVerificationPhrases = null;
-        private IPersistentStorageService _persistantStorageService;
+        private readonly SpeakerRecognitionClient _speakerRecognitionClient;
+        private readonly ISessionStateService _sessionStateService;
+        private static List<string> _verificationPhrases;
+        private readonly IPersistentStorageService _persistantStorageService;
+        private readonly IJwtHandler _jwtHandler;
 
         public VerificationProfilesController(IConfiguration configuration,
             ISessionStateService sessionStateService,
-            SpeakerRecognitionClient mSpeakerRecognitionClient,
-            IPersistentStorageService persistantStorageService)
+            SpeakerRecognitionClient speakerRecognitionClient,
+            IPersistentStorageService persistantStorageService,
+            IJwtHandler jwtHandler)
         {
             _persistantStorageService = persistantStorageService;
-            this.mSpeakerRecognitionClient = mSpeakerRecognitionClient;
-            mSessionStateService = sessionStateService;
+            _speakerRecognitionClient = speakerRecognitionClient;
+            _sessionStateService = sessionStateService;
+            _jwtHandler = jwtHandler;
         }
 
 
@@ -52,19 +52,19 @@ namespace Sesame.Web.Controllers
         public async Task<IActionResult> GetVerificationPhrasesAsync([FromQuery]string locale)
         {
             // These rarely, if ever change, so should be cached and reused. Workaround for lack of static support.
-            if (mVerificationPhrases == null)
+            if (_verificationPhrases == null)
             {
                 try
                 {
-                    mVerificationPhrases = await mSpeakerRecognitionClient.ListAllSupportedVerificationPhrasesAsync(locale.IsNullOrEmpty() ? "en-us" : locale);
+                    _verificationPhrases = await _speakerRecognitionClient.ListAllSupportedVerificationPhrasesAsync(locale.IsNullOrEmpty() ? "en-us" : locale);
                 }
                 catch (HttpException e)
                 {
-                    return StatusCode((int)e.StatusCode, e.Message);
+                    return StatusCode(e.StatusCode, e.Message);
                 }
             }
 
-            return Ok(mVerificationPhrases);
+            return Ok(_verificationPhrases);
         }
 
         /// <summary>
@@ -78,22 +78,20 @@ namespace Sesame.Web.Controllers
         {
             var userPrincipalName = _getUserUniqueId();
 
-            string result = null;
-
             try
             {
-                result = await _persistantStorageService.GetSpeakerProfileAsync(userPrincipalName, SpeakerProfileType.Verification);
+                var result = await _persistantStorageService.GetSpeakerProfileAsync(userPrincipalName, SpeakerProfileType.Verification);
 
                 if (result.IsNullOrEmpty())
                 {
-                    result = await mSpeakerRecognitionClient.CreateVerificationProfileAsync();
+                    result = await _speakerRecognitionClient.CreateVerificationProfileAsync();
                     await _persistantStorageService.CreateSpeakerProfileAsync(userPrincipalName, SpeakerProfileType.Verification, result);
                 }
                 return Ok(result);
             }
             catch (HttpException e)
             {
-                return StatusCode((int)e.StatusCode, e.Message);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
 
@@ -113,11 +111,11 @@ namespace Sesame.Web.Controllers
                     return StatusCode(400, "new user");
                 }
 
-                return Ok(await mSpeakerRecognitionClient.GetVerificationProfileAsync(verificationProfileId));
+                return Ok(await _speakerRecognitionClient.GetVerificationProfileAsync(verificationProfileId));
             }
             catch (HttpException e)
             {
-                return StatusCode((int)e.StatusCode, e.Message);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
 
@@ -129,12 +127,12 @@ namespace Sesame.Web.Controllers
         {
             try
             {
-                await mSpeakerRecognitionClient.DeleteVerificationProfileAsync(verificationProfileId);
+                await _speakerRecognitionClient.DeleteVerificationProfileAsync(verificationProfileId);
                 return Ok();
             }
             catch (HttpException e)
             {
-                return StatusCode((int)e.StatusCode, e.Message);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
 
@@ -180,27 +178,27 @@ namespace Sesame.Web.Controllers
 
                 try
                 {
-                    var result = await mSpeakerRecognitionClient.CreateVerificationProfileEnrollmentAsync(verificationProfileId, waveBytes);
+                    var result = await _speakerRecognitionClient.CreateVerificationProfileEnrollmentAsync(verificationProfileId, waveBytes);
 
                     await _persistantStorageService.UpdateSpeakerVerificationPhraseAsync(userPrincipalName, result.Phrase);
                     return Ok(result);
                 }
                 catch (HttpException e)
                 {
-                    return StatusCode((int)e.StatusCode, e.Message);
+                    return StatusCode(e.StatusCode, e.Message);
                 }
             }
         }
 
         // TODO This really should be split into two - one to get and one to assign
-        // api/verificationProfiles/{userPrincipalName}/phrase
+        // api/verificationProfiles/{pin}/phrase
         [HttpGet]
         [Route("{pin}/phrase")]
         public async Task<IActionResult> GetVerificationPhrase(string pin)
         {
             try
             {
-                string userPrincipalName = await _persistantStorageService.GetSpeakerByPinAsync(pin);
+                var userPrincipalName = await _persistantStorageService.GetSpeakerByPinAsync(pin);
 
                 return Ok(new { Phrase = await _persistantStorageService.GetSpeakerVerificationPhraseAsync(userPrincipalName) });
             }
@@ -238,12 +236,12 @@ namespace Sesame.Web.Controllers
         {
             try
             {
-                await mSpeakerRecognitionClient.ResetVerificationProfileEnrollmentsAsync(verificationProfileId);
+                await _speakerRecognitionClient.ResetVerificationProfileEnrollmentsAsync(verificationProfileId);
                 return Ok();
             }
             catch (HttpException e)
             {
-                return StatusCode((int)e.StatusCode, e.Message);
+                return StatusCode(e.StatusCode, e.Message);
             }
         }
 
@@ -273,8 +271,6 @@ namespace Sesame.Web.Controllers
                 try
                 {
                     //find it based on pin
-
-
                     string verificationProfileId;
                     try
                     {
@@ -286,22 +282,86 @@ namespace Sesame.Web.Controllers
                         return StatusCode(400, "No valid speaker profile matching PIN.");
                     }
 
-                    var result = await mSpeakerRecognitionClient.VerifyAsync(verificationProfileId, waveBytes);
+                    var result = await _speakerRecognitionClient.VerifyAsync(verificationProfileId, waveBytes);
 
                     if (result.Result == "Accept")
                     {
-                        mSessionStateService.Set<bool>("VoiceAuthenticated", true);
-                        mSessionStateService.Set<string>("UserPrincipalName", await _persistantStorageService.GetSpeakerByPinAsync(pin));
+                        _sessionStateService.Set("VoiceAuthenticated", true);
+                        _sessionStateService.Set("UserPrincipalName", await _persistantStorageService.GetSpeakerByPinAsync(pin));
                     }
 
                     return Ok(result);
                 }
                 catch (HttpException e)
                 {
-                    return StatusCode((int)e.StatusCode, e.Message);
+                    return StatusCode(e.StatusCode, e.Message);
                 }
             }
         }
+
+
+        //az
+        //api/verificationProfiles/authenticationtoken/{pin}/verifyvoice
+        [HttpPost]
+        [Route("authenticationtoken/{pin}/verifyvoice")]
+        public async Task<IActionResult> AuthenticationToken(string pin)
+        {
+
+            //find it based on pin
+            string verificationProfileId;
+            try
+            {
+                verificationProfileId = await _persistantStorageService.GetSpeakerVerificationProfileByPinAsync(pin);
+            }
+            catch
+            {
+                //throw new InvalidOperationException("No valid speaker profile matching PIN.");
+                return StatusCode(400, "No valid speaker profile matching PIN.");
+            }
+
+
+            using (var memoryStream = new MemoryStream())
+            {
+
+                try
+                {
+                    await Request.Body.CopyToAsync(memoryStream);
+                    byte[] waveBytes = memoryStream.ToArray();
+
+                    VerificationResult result = await _speakerRecognitionClient.VerifyAsync(verificationProfileId, waveBytes);
+
+                    if (result.Result == "Accept")
+                    {
+                        var user = await _persistantStorageService.GetUserByVerificationProfileId(verificationProfileId);
+
+                        if (user == null)
+                        {
+                            return StatusCode(500, "Invalid verification profile provided.");
+                        }
+
+                        var claims = new Dictionary<string, string>
+                        {
+                            {OpenIdConnectConstants.Claims.Subject, user.UserPrinipleName }
+                        };
+
+                        return Json(new { result = result.Result, jwt = _jwtHandler.Create(claims) });
+                    }
+                    else
+                    {
+                        return Json(new { result = result.Result });
+                    }
+                }
+                catch (HttpException e)
+                {
+                    return StatusCode(e.StatusCode, e.Message);
+                }
+                catch (Exception e)
+                {
+                    return StatusCode(500, e.ToString());
+                }
+            }
+        }
+
 
         string _getUserUniqueId()
         {

@@ -14,6 +14,7 @@
   <ItemGroup>
     <Folder Include="Content\" />
     <Folder Include="Helpers\Facade\" />
+    <Folder Include="Keys\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -50,6 +51,15 @@
   <ItemGroup>
     <None Update="devcert.pfx">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Keys\keys.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Keys\rsa-private-key.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Keys\rsa-public-key.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

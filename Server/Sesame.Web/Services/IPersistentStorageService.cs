@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Sesame.Web.DatabaseContexts;
 using Sesame.Web.Models;
 
 namespace Sesame.Web.Services
@@ -23,5 +24,7 @@ namespace Sesame.Web.Services
 
         Task<SimpleClaim> GetSimpleClaimAsync(string userPrincipalName);
         Task UpdateClaim(SimpleClaim simpleClaim);
+        Task<MappedAuthentication> GetUserByVerificationProfileId(string verificationProfileId);
+
     }
 }
